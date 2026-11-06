@@ -1,13 +1,21 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { MapView } from './components/MapView'
-import { places, routes } from './data/content'
+import { authors, memories, places, routes } from './data/content'
 import { loadRemoteMedia } from './services/mediaApi'
-import type { MediaItem, Shop } from './types/content'
+import type { Author, AuthorRole, MediaItem, Memory, Shop } from './types/content'
 import { artworkDataUri } from './map/artwork'
+
+const repositoryUrl = 'https://github.com/ZhouYinLong-lab/Memory_Atlas'
+const contributionGuideUrl = `${repositoryUrl}/blob/master/CONTRIBUTING_AGENT.md`
+const authorRoleLabels: Record<AuthorRole, string> = {
+  owner: '主要作者',
+  coauthor: '联合作者',
+  photographer: '摄影者',
+}
 
 function thumbnailSource(item: MediaItem) {
   if (item.thumbnail) return item.thumbnail
-  if (item.src.startsWith('/media/') && item.type === 'image' && /\.webp$/i.test(item.src)) {
+  if (item.src.includes('/media/') && item.type === 'image' && /\.webp$/i.test(item.src)) {
     return item.src.replace(/\.webp$/i, '.thumb.webp')
   }
   return item.src
@@ -129,6 +137,73 @@ function ShopCard({ shop, onOpen }: { shop: Shop; onOpen: () => void }) {
   )
 }
 
+function formatOccurredAt(value: string) {
+  return new Intl.DateTimeFormat('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    ...(value.includes('T') ? { hour: '2-digit', minute: '2-digit', hour12: false } : {}),
+    timeZone: 'Asia/Shanghai',
+  }).format(new Date(value))
+}
+
+function MemoryCard({
+  memory,
+  authorsById,
+  onPreview,
+}: {
+  memory: Memory
+  authorsById: Map<string, Author>
+  onPreview: (index: number) => void
+}) {
+  return (
+    <article className="memory-card" id={`memory-${memory.id}`} data-memory-id={memory.id}>
+      <header className="memory-card__header">
+        <time dateTime={memory.occurredAt}>{formatOccurredAt(memory.occurredAt)}</time>
+        <span>{memory.id}</span>
+      </header>
+      <h3>{memory.title}</h3>
+      <dl className="memory-card__authors">
+        {(['owner', 'coauthor', 'photographer'] as AuthorRole[]).map((role) => {
+          const contributors = memory.authors
+            .filter((contributor) => contributor.role === role)
+            .map((contributor) => authorsById.get(contributor.authorId))
+            .filter((author): author is Author => Boolean(author))
+          if (contributors.length === 0) return null
+
+          return (
+            <div key={role}>
+              <dt>{authorRoleLabels[role]}</dt>
+              <dd>
+                {contributors.map((author, index) => (
+                  <span key={author.id}>
+                    {index > 0 && '、'}
+                    {author.profileUrl
+                      ? <a href={author.profileUrl} target="_blank" rel="noreferrer">{author.displayName}</a>
+                      : author.displayName}
+                  </span>
+                ))}
+              </dd>
+            </div>
+          )
+        })}
+      </dl>
+      <p>{memory.description}</p>
+      {memory.media.length > 0 && (
+        <div className="memory-card__media">
+          {memory.media.map((item, index) => (
+            <MediaBlock key={`${memory.id}-${item.src}`} item={item} onPreview={() => onPreview(index)} />
+          ))}
+        </div>
+      )}
+      <footer className="memory-card__footer">
+        <span>{memory.license}</span>
+        {memory.sourceIssue && <a href={memory.sourceIssue} target="_blank" rel="noreferrer">SOURCE ↗</a>}
+      </footer>
+    </article>
+  )
+}
+
 function App() {
   const [activePlaceId, setActivePlaceId] = useState<string | null>(null)
   const [hoveredPlaceId, setHoveredPlaceId] = useState<string | null>(null)
@@ -136,6 +211,9 @@ function App() {
   const [remoteMedia, setRemoteMedia] = useState<Record<string, MediaItem[]>>({})
   const [previewIndex, setPreviewIndex] = useState<number | null>(null)
   const [selectedShopId, setSelectedShopId] = useState<string | null>(null)
+  const [selectedMemoryId, setSelectedMemoryId] = useState<string | null>(null)
+  const [memoryAuthorFilter, setMemoryAuthorFilter] = useState('all')
+  const [memoryTimeFilter, setMemoryTimeFilter] = useState('all')
 
   const activePlace = useMemo(
     () => places.find((place) => place.id === activePlaceId) ?? null,
@@ -145,17 +223,43 @@ function App() {
   const previousPlace = activePlaceIndex >= 0 ? places[(activePlaceIndex - 1 + places.length) % places.length] : null
   const nextPlace = activePlaceIndex >= 0 ? places[(activePlaceIndex + 1) % places.length] : null
   const selectedShop = activePlace?.shops?.find((shop) => shop.id === selectedShopId) ?? null
+  const selectedMemory = memories.find((memory) => memory.id === selectedMemoryId) ?? null
   const hasShops = Boolean(activePlace?.shops?.length)
-  const previewItems = selectedShop
-    ? selectedShop.media
-    : activePlace
-      ? (remoteMedia[activePlace.id] ?? activePlace.media)
-      : []
+  const activePlaceMemories = useMemo(
+    () => memories.filter((memory) => memory.placeId === activePlace?.id),
+    [activePlace?.id],
+  )
+  const memoryAuthors = useMemo(() => {
+    const ids = new Set(activePlaceMemories.flatMap((memory) => memory.authors.map((contributor) => contributor.authorId)))
+    return authors.filter((author) => ids.has(author.id))
+  }, [activePlaceMemories])
+  const memoryTimes = useMemo(
+    () => [...new Set(activePlaceMemories.map((memory) => memory.occurredAt))].sort().reverse(),
+    [activePlaceMemories],
+  )
+  const filteredMemories = useMemo(
+    () => activePlaceMemories
+      .filter((memory) => memoryAuthorFilter === 'all' || memory.authors.some((contributor) => contributor.authorId === memoryAuthorFilter))
+      .filter((memory) => memoryTimeFilter === 'all' || memory.occurredAt === memoryTimeFilter)
+      .sort((left, right) => Date.parse(right.occurredAt) - Date.parse(left.occurredAt)),
+    [activePlaceMemories, memoryAuthorFilter, memoryTimeFilter],
+  )
+  const authorsById = useMemo(() => new Map(authors.map((author) => [author.id, author])), [])
+  const previewItems = selectedMemory
+    ? selectedMemory.media
+    : selectedShop
+      ? selectedShop.media
+      : activePlace
+        ? (remoteMedia[activePlace.id] ?? activePlace.media)
+        : []
   const previewItem = previewIndex === null ? null : previewItems[previewIndex] ?? null
 
   useEffect(() => {
     setSelectedShopId(null)
+    setSelectedMemoryId(null)
     setPreviewIndex(null)
+    setMemoryAuthorFilter('all')
+    setMemoryTimeFilter('all')
   }, [activePlaceId])
 
   useEffect(() => {
@@ -183,7 +287,18 @@ function App() {
 
   const handleSelectShop = useCallback((shopId: string) => {
     setSelectedShopId(shopId)
+    setSelectedMemoryId(null)
     setPreviewIndex(null)
+  }, [])
+
+  const handlePreviewPlaceMedia = useCallback((index: number) => {
+    setSelectedMemoryId(null)
+    setPreviewIndex(index)
+  }, [])
+
+  const handlePreviewMemoryMedia = useCallback((memoryId: string, index: number) => {
+    setSelectedMemoryId(memoryId)
+    setPreviewIndex(index)
   }, [])
 
   const handleSelectRoute = useCallback((routeId: string) => {
@@ -267,9 +382,45 @@ function App() {
                   <h2>地点图册</h2>
                 </div>
                 <div className="media-grid">
-                  {(remoteMedia[activePlace.id] ?? activePlace.media).map((item, index) => <MediaBlock key={`${item.type}-${index}`} item={item} onPreview={() => setPreviewIndex(index)} />)}
+                  {(remoteMedia[activePlace.id] ?? activePlace.media).map((item, index) => <MediaBlock key={`${item.type}-${index}`} item={item} onPreview={() => handlePreviewPlaceMedia(index)} />)}
                 </div>
               </section>
+              {activePlaceMemories.length > 0 && (
+                <section className="detail-section shared-memories" aria-label="Shared Memories">
+                  <div className="detail-section__heading">
+                    <span className="detail-section__index">MEMORY / SHARED</span>
+                    <h2>Shared Memories</h2>
+                    <span className="detail-section__count">{activePlaceMemories.length.toString().padStart(2, '0')} STORIES</span>
+                  </div>
+                  <div className="memory-filters" aria-label="记忆筛选">
+                    <label>
+                      <span>作者</span>
+                      <select value={memoryAuthorFilter} onChange={(event) => setMemoryAuthorFilter(event.target.value)}>
+                        <option value="all">全部作者</option>
+                        {memoryAuthors.map((author) => <option key={author.id} value={author.id}>{author.displayName}</option>)}
+                      </select>
+                    </label>
+                    <label>
+                      <span>时间</span>
+                      <select value={memoryTimeFilter} onChange={(event) => setMemoryTimeFilter(event.target.value)}>
+                        <option value="all">全部时间</option>
+                        {memoryTimes.map((time) => <option key={time} value={time}>{formatOccurredAt(time)}</option>)}
+                      </select>
+                    </label>
+                  </div>
+                  <div className="memory-list">
+                    {filteredMemories.map((memory) => (
+                      <MemoryCard
+                        key={memory.id}
+                        memory={memory}
+                        authorsById={authorsById}
+                        onPreview={(index) => handlePreviewMemoryMedia(memory.id, index)}
+                      />
+                    ))}
+                    {filteredMemories.length === 0 && <p className="memory-list__empty">没有符合当前筛选条件的记忆。</p>}
+                  </div>
+                </section>
+              )}
             </>
           )}
           {previousPlace && nextPlace && (
@@ -301,14 +452,17 @@ function App() {
 
       <a
         className="github-repo-link"
-        href="https://github.com/ZhouYinLong-lab/Dog-Map"
+        href={repositoryUrl}
         target="_blank"
         rel="noreferrer"
-        aria-label="打开 Dog Map GitHub 仓库"
+        aria-label="打开 Memory Atlas GitHub 仓库"
       >
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path fill="currentColor" d="M12 .7a11.3 11.3 0 0 0-3.57 22.02c.57.1.78-.25.78-.55v-2.14c-3.17.69-3.84-1.34-3.84-1.34-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.74 2.68 1.24 3.33.95.1-.74.4-1.24.73-1.53-2.53-.29-5.2-1.27-5.2-5.65 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.45.11-3.02 0 0 .96-.31 3.13 1.17a10.86 10.86 0 0 1 5.7 0c2.17-1.48 3.13-1.17 3.13-1.17.62 1.57.23 2.73.11 3.02.73.8 1.18 1.82 1.18 3.07 0 4.39-2.68 5.35-5.22 5.64.41.36.78 1.07.78 2.16v3.2c0 .3.2.66.79.55A11.3 11.3 0 0 0 12 .7Z" />
         </svg>
+      </a>
+      <a className="contribute-memory-link" href={contributionGuideUrl} target="_blank" rel="noreferrer">
+        <span>＋</span> Contribute a Memory
       </a>
     </main>
   )

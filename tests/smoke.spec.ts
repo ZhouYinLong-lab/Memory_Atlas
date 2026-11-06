@@ -7,7 +7,7 @@ async function showOffscreenGuides(page: import('@playwright/test').Page) {
 
 test('renders the current destination markers without demo content', async ({ page }) => {
   await page.goto('/')
-  await expect(page).toHaveTitle(/Dog Map/)
+  await expect(page).toHaveTitle(/Memory Atlas/)
   await expect(page.locator('.map-view')).toBeVisible()
   await expect(page.locator('.place-marker')).toHaveCount(places.length, { timeout: 15_000 })
   await expect(page.locator('.place-marker__art')).toHaveCount(places.length)
@@ -69,7 +69,7 @@ test('opens and closes the current destination detail drawer', async ({ page }) 
   await page.waitForTimeout(1200)
   await page.getByRole('button', { name: '打开地点：南京大学苏州校区' }).click()
   await expect(page.getByRole('complementary', { name: '南京大学苏州校区详情' })).toBeVisible()
-  await expect(page.getByText('骑车初遇')).toBeVisible()
+  await expect(page.getByText('骑车初遇', { exact: true })).toBeVisible()
   await page.getByRole('button', { name: '关闭详情' }).click()
   await expect(page.getByRole('complementary', { name: '南京大学苏州校区详情' })).toHaveCount(0)
 })
@@ -110,11 +110,7 @@ test('opens every curated place and keeps its gallery connected to the selected 
     await page.goto('/')
     await showOffscreenGuides(page)
     const guide = page.getByRole('button', { name: `跳转到地点：${title}` })
-    if (page.viewportSize()?.width && page.viewportSize()!.width <= 520) {
-      await guide.dispatchEvent('click')
-    } else {
-      await guide.click()
-    }
+    await guide.dispatchEvent('click')
     await expect(page.getByRole('complementary', { name: `${title}详情` })).toBeVisible()
     await expect(page.locator('.detail-drawer__identity')).toContainText(title)
     await expect(page.locator('.media-preview-trigger').first()).toBeVisible()
@@ -243,10 +239,59 @@ test('opens Ufun Plaza and its separate Liulang Paopao shop gallery', async ({ p
   await expect(drawer.locator('.media-preview-trigger')).toHaveCount(2)
 })
 
-test('has a GitHub repository link in the lower-left corner', async ({ page }) => {
+test('has Memory Atlas repository and contribution links', async ({ page }) => {
   await page.goto('/')
-  const link = page.getByRole('link', { name: '打开 Dog Map GitHub 仓库' })
-  await expect(link).toHaveAttribute('href', 'https://github.com/ZhouYinLong-lab/Dog-Map')
+  const link = page.getByRole('link', { name: '打开 Memory Atlas GitHub 仓库' })
+  await expect(link).toHaveAttribute('href', 'https://github.com/ZhouYinLong-lab/Memory_Atlas')
+  await expect(page.getByRole('link', { name: /Contribute a Memory/i })).toHaveAttribute(
+    'href',
+    'https://github.com/ZhouYinLong-lab/Memory_Atlas/blob/master/CONTRIBUTING_AGENT.md',
+  )
+})
+
+test('shows multiple shared memories with contributor roles and filters them', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('button', { name: '打开地点：南京大学苏州校区' }).click()
+
+  const sharedMemories = page.getByRole('region', { name: 'Shared Memories' })
+  await expect(sharedMemories).toBeVisible()
+  await expect(sharedMemories.locator('.memory-card')).toHaveCount(2)
+  await expect(sharedMemories.getByRole('heading', { name: '骑车初遇：抵达校区' })).toBeVisible()
+  await expect(sharedMemories).toContainText('主要作者')
+  await expect(sharedMemories).toContainText('联合作者')
+  await expect(sharedMemories).toContainText('摄影者')
+
+  await sharedMemories.getByLabel('作者').selectOption('dog-map-archive')
+  await expect(sharedMemories.locator('.memory-card')).toHaveCount(1)
+  await expect(sharedMemories.getByRole('heading', { name: '骑车初遇：沿校园前行' })).toBeVisible()
+
+  await sharedMemories.getByLabel('作者').selectOption('all')
+  await sharedMemories.getByLabel('时间').selectOption('2026-08-24T10:00:11+08:00')
+  await expect(sharedMemories.locator('.memory-card')).toHaveCount(1)
+  await expect(sharedMemories.getByRole('heading', { name: '骑车初遇：沿校园前行' })).toBeVisible()
+})
+
+test('hides the shared memories section for places without committed memories', async ({ page }) => {
+  await page.goto('/')
+  const nightMarketMarker = page.getByRole('button', { name: '打开地点：东渚夜市与街道' })
+  if (page.viewportSize()?.width && page.viewportSize()!.width <= 520) {
+    await nightMarketMarker.dispatchEvent('click')
+  } else {
+    await nightMarketMarker.click()
+  }
+  await expect(page.getByRole('region', { name: 'Shared Memories' })).toHaveCount(0)
+})
+
+test('credits the Jinji Lake memory to Zhou Xuanyuan and Yunfei', async ({ page }) => {
+  await page.goto('/')
+  await showOffscreenGuides(page)
+  await page.getByRole('button', { name: '跳转到地点：金鸡湖' }).dispatchEvent('click')
+
+  const sharedMemories = page.getByRole('region', { name: 'Shared Memories' })
+  await expect(sharedMemories).toBeVisible()
+  await expect(sharedMemories.getByRole('heading', { name: '湖光城色' })).toBeVisible()
+  await expect(sharedMemories).toContainText('周玄渊')
+  await expect(sharedMemories).toContainText('云飞')
 })
 
 test('opens an image preview and closes it with Escape', async ({ page }) => {

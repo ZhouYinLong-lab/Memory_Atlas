@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  // GitHub Pages redirects this project to its custom domain, so assets must
-  // resolve from the domain root instead of /Dog-Map/.
-  base: '/',
+  // Relative build assets support both the /Memory_Atlas/ GitHub Pages path
+  // and a future custom domain. Runtime JSON media paths are normalized too.
+  base: './',
 })

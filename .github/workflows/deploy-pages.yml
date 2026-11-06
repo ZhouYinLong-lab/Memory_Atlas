@@ -1,4 +1,4 @@
-name: Deploy Dog Map to GitHub Pages
+name: Deploy Memory Atlas to GitHub Pages
 
 on:
   push:
