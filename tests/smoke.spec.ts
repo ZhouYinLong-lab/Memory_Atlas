@@ -249,7 +249,7 @@ test('has Memory Atlas repository and contribution links', async ({ page }) => {
   )
 })
 
-test('shows multiple shared memories with contributor roles and filters them', async ({ page }) => {
+test('shows ordered authors first and filters shared memories', async ({ page }) => {
   await page.goto('/')
   await page.getByRole('button', { name: '打开地点：南京大学苏州校区' }).click()
 
@@ -257,13 +257,17 @@ test('shows multiple shared memories with contributor roles and filters them', a
   await expect(sharedMemories).toBeVisible()
   await expect(sharedMemories.locator('.memory-card')).toHaveCount(2)
   await expect(sharedMemories.getByRole('heading', { name: '骑车初遇：抵达校区' })).toBeVisible()
-  await expect(sharedMemories).toContainText('主要作者')
-  await expect(sharedMemories).toContainText('联合作者')
-  await expect(sharedMemories).toContainText('摄影者')
+  await expect(sharedMemories).not.toContainText('主要作者')
+  await expect(sharedMemories).not.toContainText('联合作者')
+  await expect(sharedMemories).not.toContainText('摄影者')
+  const firstMemory = sharedMemories.locator('.memory-card').first()
+  await expect(firstMemory.locator('.memory-card__author-line')).toHaveText('周玄渊')
+  expect(await firstMemory.locator('.memory-card__author-line').evaluate((node) => (
+    Boolean(node.compareDocumentPosition(node.parentElement!.querySelector('.memory-card__header')) & Node.DOCUMENT_POSITION_FOLLOWING)
+  ))).toBe(true)
 
-  await sharedMemories.getByLabel('作者').selectOption('dog-map-archive')
-  await expect(sharedMemories.locator('.memory-card')).toHaveCount(1)
-  await expect(sharedMemories.getByRole('heading', { name: '骑车初遇：沿校园前行' })).toBeVisible()
+  await sharedMemories.getByLabel('作者').selectOption('zhou-xuanyuan')
+  await expect(sharedMemories.locator('.memory-card')).toHaveCount(2)
 
   await sharedMemories.getByLabel('作者').selectOption('all')
   await sharedMemories.getByLabel('时间').selectOption('2026-08-24T10:00:11+08:00')
@@ -290,8 +294,7 @@ test('credits the Jinji Lake memory to Zhou Xuanyuan and Yunfei', async ({ page 
   const sharedMemories = page.getByRole('region', { name: 'Shared Memories' })
   await expect(sharedMemories).toBeVisible()
   await expect(sharedMemories.getByRole('heading', { name: '湖光城色' })).toBeVisible()
-  await expect(sharedMemories).toContainText('周玄渊')
-  await expect(sharedMemories).toContainText('云飞')
+  await expect(sharedMemories.locator('.memory-card__author-line')).toHaveText('周玄渊 · 云飞')
 })
 
 test('opens an image preview and closes it with Escape', async ({ page }) => {

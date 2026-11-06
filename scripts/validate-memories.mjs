@@ -11,7 +11,6 @@ const errors = []
 const placeIds = new Set(places.map((place) => place.id))
 const authorIds = new Set()
 const memoryIds = new Set()
-const roles = new Set(['owner', 'coauthor', 'photographer'])
 
 for (const [index, author] of authors.entries()) {
   const label = author?.id || `authors[${index}]`
@@ -38,17 +37,13 @@ for (const [index, memory] of memories.entries()) {
   if (!Array.isArray(memory?.authors) || memory.authors.length === 0) {
     errors.push(`${label}: authors must contain at least one contributor`)
   } else {
-    if (!memory.authors.some((contributor) => contributor?.role === 'owner')) {
-      errors.push(`${label}: at least one author must have the owner role`)
-    }
-    for (const [authorIndex, contributor] of memory.authors.entries()) {
-      const contributorLabel = `${label}.authors[${authorIndex}]`
-      if (!authorIds.has(contributor?.authorId)) {
-        errors.push(`${contributorLabel}: authorId "${contributor?.authorId ?? ''}" does not exist`)
-      }
-      if (!roles.has(contributor?.role)) {
-        errors.push(`${contributorLabel}: role must be owner, coauthor, or photographer`)
-      }
+    const seenMemoryAuthors = new Set()
+    for (const [authorIndex, authorId] of memory.authors.entries()) {
+      const authorLabel = `${label}.authors[${authorIndex}]`
+      if (!nonEmptyString(authorId)) errors.push(`${authorLabel}: author id is required`)
+      if (!authorIds.has(authorId)) errors.push(`${authorLabel}: author id "${authorId ?? ''}" does not exist`)
+      if (seenMemoryAuthors.has(authorId)) errors.push(`${authorLabel}: duplicate author id "${authorId}"`)
+      seenMemoryAuthors.add(authorId)
     }
   }
 

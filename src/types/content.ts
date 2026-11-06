@@ -16,13 +16,6 @@ export type Author = {
   avatarUrl?: string
 }
 
-export type AuthorRole = 'owner' | 'coauthor' | 'photographer'
-
-export type MemoryAuthor = {
-  authorId: string
-  role: AuthorRole
-}
-
 export type Memory = {
   id: string
   placeId: string
@@ -30,7 +23,7 @@ export type Memory = {
   description: string
   occurredAt: string
   createdAt: string
-  authors: MemoryAuthor[]
+  authors: string[]
   media: MediaItem[]
   license: string
   sourceIssue?: string

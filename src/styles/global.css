@@ -98,15 +98,13 @@ button { font: inherit; }
 .memory-list__empty { margin: 0; padding: 12px; color: var(--paper-soft); border: 1px dashed var(--line); font: 11px/1.5 var(--body); }
 .memory-card { position: relative; padding: 15px; overflow: hidden; background: rgba(242,234,220,0.06); border: 1px solid var(--line); border-left: 4px solid var(--yellow); }
 .memory-card::after { content: ''; position: absolute; top: 0; right: 0; width: 24px; height: 24px; background: var(--red); clip-path: polygon(100% 0, 100% 100%, 0 0); }
+.memory-card__author-line { margin: 0 24px 11px 0; color: var(--paper); font: 14px/1.2 var(--display); letter-spacing: 0.04em; }
+.memory-card__author-line a { color: inherit; text-underline-offset: 3px; }
+.memory-card__author-separator { color: var(--yellow); }
 .memory-card__header { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--yellow); font: 8px/1.2 var(--mono); letter-spacing: 0.05em; }
 .memory-card__header span { overflow: hidden; color: var(--paper-soft); text-overflow: ellipsis; white-space: nowrap; }
 .memory-card h3 { margin: 10px 0 12px; color: var(--paper); font: 24px/1 var(--display); letter-spacing: 0.03em; }
 .memory-card > p { margin: 13px 0; color: var(--paper-soft); font: 13px/1.6 var(--body); }
-.memory-card__authors { display: grid; gap: 6px; margin: 0; }
-.memory-card__authors div { display: grid; grid-template-columns: 60px minmax(0, 1fr); gap: 8px; }
-.memory-card__authors dt { color: var(--yellow); font: 8px/1.5 var(--mono); letter-spacing: 0.06em; }
-.memory-card__authors dd { margin: 0; color: var(--paper); font: 11px/1.4 var(--body); }
-.memory-card__authors a { color: inherit; text-underline-offset: 3px; }
 .memory-card__media { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
 .memory-card__media:has(> :only-child) { grid-template-columns: 1fr; }
 .memory-card__media .media-block, .memory-card__media .media-error { min-height: 110px; max-height: 220px; }

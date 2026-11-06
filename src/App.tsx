@@ -2,17 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { MapView } from './components/MapView'
 import { authors, memories, places, routes } from './data/content'
 import { loadRemoteMedia } from './services/mediaApi'
-import type { Author, AuthorRole, MediaItem, Memory, Shop } from './types/content'
+import type { Author, MediaItem, Memory, Shop } from './types/content'
 import { artworkDataUri } from './map/artwork'
 
 const repositoryUrl = 'https://github.com/ZhouYinLong-lab/Memory_Atlas'
 const contributionGuideUrl = `${repositoryUrl}/blob/master/CONTRIBUTING_AGENT.md`
-const authorRoleLabels: Record<AuthorRole, string> = {
-  owner: '主要作者',
-  coauthor: '联合作者',
-  photographer: '摄影者',
-}
-
 function thumbnailSource(item: MediaItem) {
   if (item.thumbnail) return item.thumbnail
   if (item.src.includes('/media/') && item.type === 'image' && /\.webp$/i.test(item.src)) {
@@ -156,38 +150,27 @@ function MemoryCard({
   authorsById: Map<string, Author>
   onPreview: (index: number) => void
 }) {
+  const memoryAuthors = memory.authors
+    .map((authorId) => authorsById.get(authorId))
+    .filter((author): author is Author => Boolean(author))
+
   return (
     <article className="memory-card" id={`memory-${memory.id}`} data-memory-id={memory.id}>
+      <div className="memory-card__author-line">
+        {memoryAuthors.map((author, index) => (
+          <span key={author.id}>
+            {index > 0 && <span className="memory-card__author-separator" aria-hidden="true"> · </span>}
+            {author.profileUrl
+              ? <a href={author.profileUrl} target="_blank" rel="noreferrer">{author.displayName}</a>
+              : author.displayName}
+          </span>
+        ))}
+      </div>
       <header className="memory-card__header">
         <time dateTime={memory.occurredAt}>{formatOccurredAt(memory.occurredAt)}</time>
         <span>{memory.id}</span>
       </header>
       <h3>{memory.title}</h3>
-      <dl className="memory-card__authors">
-        {(['owner', 'coauthor', 'photographer'] as AuthorRole[]).map((role) => {
-          const contributors = memory.authors
-            .filter((contributor) => contributor.role === role)
-            .map((contributor) => authorsById.get(contributor.authorId))
-            .filter((author): author is Author => Boolean(author))
-          if (contributors.length === 0) return null
-
-          return (
-            <div key={role}>
-              <dt>{authorRoleLabels[role]}</dt>
-              <dd>
-                {contributors.map((author, index) => (
-                  <span key={author.id}>
-                    {index > 0 && '、'}
-                    {author.profileUrl
-                      ? <a href={author.profileUrl} target="_blank" rel="noreferrer">{author.displayName}</a>
-                      : author.displayName}
-                  </span>
-                ))}
-              </dd>
-            </div>
-          )
-        })}
-      </dl>
       <p>{memory.description}</p>
       {memory.media.length > 0 && (
         <div className="memory-card__media">
@@ -230,7 +213,7 @@ function App() {
     [activePlace?.id],
   )
   const memoryAuthors = useMemo(() => {
-    const ids = new Set(activePlaceMemories.flatMap((memory) => memory.authors.map((contributor) => contributor.authorId)))
+    const ids = new Set(activePlaceMemories.flatMap((memory) => memory.authors))
     return authors.filter((author) => ids.has(author.id))
   }, [activePlaceMemories])
   const memoryTimes = useMemo(
@@ -239,7 +222,7 @@ function App() {
   )
   const filteredMemories = useMemo(
     () => activePlaceMemories
-      .filter((memory) => memoryAuthorFilter === 'all' || memory.authors.some((contributor) => contributor.authorId === memoryAuthorFilter))
+      .filter((memory) => memoryAuthorFilter === 'all' || memory.authors.includes(memoryAuthorFilter))
       .filter((memory) => memoryTimeFilter === 'all' || memory.occurredAt === memoryTimeFilter)
       .sort((left, right) => Date.parse(right.occurredAt) - Date.parse(left.occurredAt)),
     [activePlaceMemories, memoryAuthorFilter, memoryTimeFilter],
