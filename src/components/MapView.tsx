@@ -105,6 +105,9 @@ function offscreenGuidesForPoints(
 ): OffscreenGuide[] {
   const center = { x: width / 2, y: height / 2 }
   const margin = Math.min(72, Math.max(36, Math.min(width, height) * 0.12))
+  const compactViewport = width <= 520
+  const controlsReservedRight = Math.min(width - margin, 390)
+  const controlsReservedBottom = Math.min(height - margin, 190)
   const horizontalLimit = Math.max(1, center.x - margin)
   const verticalLimit = Math.max(1, center.y - margin)
 
@@ -139,7 +142,8 @@ function offscreenGuidesForPoints(
       { edge: 'bottom' as const, distance: height - margin - guide.top },
       { edge: 'left' as const, distance: guide.left - margin },
     ]
-    const edge = distances.sort((first, second) => first.distance - second.distance)[0].edge
+    let edge = distances.sort((first, second) => first.distance - second.distance)[0].edge
+    if (compactViewport && edge === 'top') edge = 'right'
     guide.edge = edge
     const group = edges.get(edge) ?? []
     group.push(guide)
@@ -148,7 +152,11 @@ function offscreenGuidesForPoints(
 
   edges.forEach((group, edge) => {
     const horizontal = edge === 'top' || edge === 'bottom'
-    const axisStart = margin
+    const axisStart = edge === 'top'
+      ? controlsReservedRight
+      : horizontal
+        ? margin
+        : controlsReservedBottom
     const axisEnd = horizontal
       ? width - margin
       : Math.max(margin, height - margin - 82)
