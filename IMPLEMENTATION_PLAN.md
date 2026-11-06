@@ -31,8 +31,9 @@ Evolve Dog-Map into the static GitHub Pages–hosted Memory Atlas MVP without re
 - Repository cloned from `https://github.com/ZhouYinLong-lab/Dog-Map` on 2026-11-06.
 - Baseline: `npm install` succeeded; `npm run build` succeeded; `npm run test:e2e` finished with 43 passed and 1 intentionally skipped mobile API duplicate.
 - Final: `npm run build` succeeded after validating 19 places, 3 memories, 4 authors, and 362 media derivatives.
-- Final: `npm run test:e2e` finished with 47 passed and 1 intentionally skipped mobile API duplicate.
+- Final: `npm run test:e2e` finished with 49 passed and 1 intentionally skipped mobile API duplicate, including Jinji Lake author attribution.
 - Visual check completed for desktop and mobile Shared Memories layouts. A mobile fixed-button overlap found during testing was corrected and regression-tested.
+- GitHub Pages is enabled for `ZhouYinLong-lab/Memory_Atlas`; the production deployment and live media-path check succeeded.
 - `npm audit --omit=dev` reports two moderate Hono advisories (the server is not deployed) and one critical MapLibre advisory whose automatic fix requires a major-version upgrade; schedule that upgrade with map regression testing.
 
 ## Scope boundaries
