@@ -3,10 +3,12 @@ import { dirname, extname, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { execFileSync } from 'node:child_process'
 import places from '../src/data/places.json' with { type: 'json' }
+import memories from '../src/data/memories.json' with { type: 'json' }
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const mediaRoot = resolve(root, 'public', 'media')
 const derivatives = new Map()
+const force = process.argv.includes('--force')
 
 function addDerivative(url, kind) {
   if (typeof url !== 'string' || !url.startsWith('/media/')) return
@@ -35,8 +37,20 @@ for (const place of places) {
   }
 }
 
+for (const memory of memories) {
+  for (const item of memory.media ?? []) {
+    if (item.type === 'image') addDerivative(item.src, 'thumbnail')
+    if (item.type === 'video') addDerivative(item.poster, 'thumbnail')
+  }
+}
+
 let created = 0
+let skipped = 0
 for (const [target, { source, kind }] of derivatives) {
+  if (!force && existsSync(target)) {
+    skipped += 1
+    continue
+  }
   const maxSize = kind === 'marker' ? '512x512>' : '960x960>'
   const quality = kind === 'marker' ? '84' : '80'
   execFileSync('magick', [
@@ -51,4 +65,4 @@ for (const [target, { source, kind }] of derivatives) {
   created += 1
 }
 
-process.stdout.write(`Generated ${created} media derivatives (960px thumbnails and 512px map markers).\n`)
+process.stdout.write(`Generated ${created} media derivatives; skipped ${skipped} existing files (960px thumbnails and 512px map markers).\n`)
