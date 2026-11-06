@@ -41,3 +41,15 @@ Evolve Dog-Map into the static GitHub Pages–hosted Memory Atlas MVP without re
 - No database, authentication, independent backend deployment, or automated approval bot.
 - No deletion or migration of legacy place content.
 - No automatic publication of unreviewed Issues or PR descriptions.
+
+## Ordered-author and Agent media update
+
+- [x] Replace role-based contributors with ordered, equal author IDs.
+- [x] Credit both Nanjing campus memories to 周玄渊 and keep 金鸡湖 ordered as 周玄渊 · 云飞.
+- [x] Move repository and contribution controls to the upper-left reference layout.
+- [x] Keep offscreen map guides clickable outside the reserved control area.
+- [x] Add 2048px / quality 82 WebP preparation and Memory thumbnail derivation.
+- [x] Require Agent place confirmation, ordered authors, grounded generated copy, and missing-data follow-up.
+- [x] Update the fallback Issue Form and contributor documentation.
+
+Verification on 2026-11-06: `npm run build` passed with 3 memories, 2 authors, and 363 media derivatives; `npm run test:e2e` finished with 50 passed and 2 intentional duplicate-project skips.

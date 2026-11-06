@@ -29,7 +29,7 @@ Memory Atlas 基于 [Dog-Map](https://github.com/ZhouYinLong-lab/Dog-Map) 渐进
 - 点击图片查看大图，支持背景、关闭按钮和 `Esc` 退出
 - 响应式移动端布局
 - 静态照片与可选媒体 API 两种内容来源
-- 一个地点包含多条 Memory，一条 Memory 支持主要作者、联合作者与摄影者
+- 一个地点包含多条 Memory，一条 Memory 支持按展示顺序排列的多位平等作者
 - 按作者或发生时间筛选 Shared Memories
 - Agent 创建 PR 为主、GitHub Issue Form 为备用的投稿流程
 
@@ -44,8 +44,8 @@ Memory Atlas 基于 [Dog-Map](https://github.com/ZhouYinLong-lab/Dog-Map) 渐进
 ## Memory 内容模型
 
 - `Author`：稳定 `id`、`displayName`，以及可选 `profileUrl`、`avatarUrl`。
-- `Memory`：稳定 `id`、`placeId`、标题、正文、发生/创建时间、作者角色、媒体、授权和可选来源 Issue。
-- 作者角色：`owner`、`coauthor`、`photographer`；每条 Memory 至少有一位 `owner`。
+- `Memory`：稳定 `id`、`placeId`、标题、正文、发生/创建时间、有序作者 ID 数组、媒体、授权和可选来源 Issue。
+- 作者没有主次或摄影者角色；`authors` 数组顺序就是页面显示顺序，每条 Memory 至少有一位作者。
 
 提交前运行：
 
@@ -136,6 +136,15 @@ media-originals/<地点 id>/
 `media-originals/` 默认不会提交到 Git。建议网页使用 WebP，原图只作为本地素材归档。
 
 新增或替换 `places.json` 中的本地 WebP 照片/地点贴纸后（需要安装 ImageMagick），运行 `npm run assets:derive` 生成图册缩略图和地图贴纸轻量版。图册先加载最长边 960px 的缩略图，点击后仍查看原图；地图贴纸使用最长边 512px 版本。`npm run build` 会校验派生文件是否齐全。
+
+Agent 投稿的原始图片先运行：
+
+```bash
+npm run prepare:memory-media -- <place-id> <memory-id> <image-path> [image-path...]
+npm run assets:derive
+```
+
+第一条命令会自动旋转、移除元数据，并输出最长边不超过 2048px、质量 82 的 WebP；第二条命令为 Memory 图片生成 960px 缩略图。
 
 ## Repository Structure / 仓库结构
 

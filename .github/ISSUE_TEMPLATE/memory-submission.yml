@@ -27,7 +27,7 @@ body:
     id: coordinates
     attributes:
       label: Coordinates / 坐标
-      description: Longitude, latitude. Explain the source if this is a new location.
+      description: Longitude, latitude, used only to confirm the matching existing place. This workflow does not create a new Place.
       placeholder: 120.387037, 31.351239
     validations:
       required: true
@@ -35,15 +35,12 @@ body:
     id: memory-title
     attributes:
       label: Memory title / 标题
-    validations:
-      required: true
+      description: Optional. Leave blank and the Agent will generate a grounded title from the submitted images and context.
   - type: textarea
     id: memory-description
     attributes:
       label: Memory / 记忆正文
-      description: Tell the full story that may be published.
-    validations:
-      required: true
+      description: Optional. Leave blank and the Agent will generate grounded text without inventing people, events, or dates.
   - type: input
     id: occurred-at
     attributes:
@@ -52,27 +49,19 @@ body:
     validations:
       required: true
   - type: input
-    id: owner
+    id: authors
     attributes:
-      label: Primary author / 主要作者
+      label: Authors in display order / 作者名单（按显示顺序）
+      description: Authors have no primary, coauthor, or photographer roles. Separate multiple names with commas.
+      placeholder: 周玄渊, 云飞
     validations:
       required: true
-  - type: input
-    id: coauthors
-    attributes:
-      label: Coauthors / 联合作者
-      placeholder: Names and optional profile links
-  - type: input
-    id: photographer
-    attributes:
-      label: Photographer / 摄影者
-      placeholder: Names and optional profile links
   - type: textarea
     id: media
     attributes:
-      label: Images or video / 图片或视频
-      description: Drag files into this field, then add meaningful alt text for every file.
-      placeholder: Upload files here and list each file's alt text.
+      label: Images / 图片
+      description: Drag original images into this field. The Agent will convert them to WebP and generate specific alt text.
+      placeholder: Upload the original image files here.
     validations:
       required: true
   - type: checkboxes
