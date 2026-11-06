@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const mediaRoot = resolve(root, 'public', 'media')
 const places = JSON.parse(readFileSync(resolve(root, 'src/data/places.json'), 'utf8'))
+const memories = JSON.parse(readFileSync(resolve(root, 'src/data/memories.json'), 'utf8'))
 const required = new Set()
 
 function requireDerivative(url, kind) {
@@ -21,6 +22,13 @@ function requireDerivative(url, kind) {
 for (const place of places) {
   requireDerivative(place.markerImage, 'marker')
   for (const item of [...(place.media ?? []), ...(place.shops ?? []).flatMap((shop) => shop.media ?? [])]) {
+    if (item.type === 'image') requireDerivative(item.src, 'thumbnail')
+    if (item.type === 'video') requireDerivative(item.poster, 'thumbnail')
+  }
+}
+
+for (const memory of memories) {
+  for (const item of memory.media ?? []) {
     if (item.type === 'image') requireDerivative(item.src, 'thumbnail')
     if (item.type === 'video') requireDerivative(item.poster, 'thumbnail')
   }

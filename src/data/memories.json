@@ -1,0 +1,80 @@
+[
+  {
+    "id": "nju-suzhou-first-ride-20260824",
+    "placeId": "nju-suzhou-campus",
+    "title": "骑车初遇：抵达校区",
+    "description": "骑车抵达苏州校区，把这里记录为地图的原点。之后每一次出发、抵达和路过，都从这个坐标向城市展开。",
+    "occurredAt": "2026-08-24T09:53:00+08:00",
+    "createdAt": "2026-11-06T00:00:00+08:00",
+    "authors": [
+      {
+        "authorId": "zhouyinlong",
+        "role": "owner"
+      },
+      {
+        "authorId": "zhouyinlong",
+        "role": "photographer"
+      }
+    ],
+    "media": [
+      {
+        "type": "image",
+        "src": "/media/nju-suzhou-campus/IMG20260824095359.webp",
+        "alt": "骑车抵达南京大学苏州校区时的校园入口"
+      }
+    ],
+    "license": "CC BY-NC-ND 4.0"
+  },
+  {
+    "id": "nju-suzhou-campus-walk-20260824",
+    "placeId": "nju-suzhou-campus",
+    "title": "骑车初遇：沿校园前行",
+    "description": "同一次校园记录继续向前：沿着道路经过建筑、水面与草地，让一个地图坐标逐渐变成可被回忆的地方。",
+    "occurredAt": "2026-08-24T10:00:11+08:00",
+    "createdAt": "2026-11-06T00:05:00+08:00",
+    "authors": [
+      {
+        "authorId": "dog-map-archive",
+        "role": "owner"
+      },
+      {
+        "authorId": "zhouyinlong",
+        "role": "coauthor"
+      }
+    ],
+    "media": [
+      {
+        "type": "image",
+        "src": "/media/nju-suzhou-campus/IMG20260824100011.webp",
+        "alt": "晨光中的南京大学苏州校区道路与建筑"
+      }
+    ],
+    "license": "CC BY-NC-ND 4.0"
+  },
+  {
+    "id": "jinji-lake-city-lights-20261018",
+    "placeId": "jinji-lake",
+    "title": "湖光城色",
+    "description": "湖岸灯火与城市天际线倒映在金鸡湖面，收进夜色里的苏州水岸。",
+    "occurredAt": "2026-10-18",
+    "createdAt": "2026-11-06T00:10:00+08:00",
+    "authors": [
+      {
+        "authorId": "zhou-xuanyuan",
+        "role": "owner"
+      },
+      {
+        "authorId": "yunfei",
+        "role": "coauthor"
+      }
+    ],
+    "media": [
+      {
+        "type": "image",
+        "src": "/media/jinji-lake/jinji-lake-01.webp",
+        "alt": "金鸡湖湖岸灯光与城市天际线"
+      }
+    ],
+    "license": "CC BY-NC-ND 4.0"
+  }
+]

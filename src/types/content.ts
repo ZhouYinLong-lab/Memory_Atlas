@@ -9,6 +9,33 @@ export type MediaItem = {
   caption?: string
 }
 
+export type Author = {
+  id: string
+  displayName: string
+  profileUrl?: string
+  avatarUrl?: string
+}
+
+export type AuthorRole = 'owner' | 'coauthor' | 'photographer'
+
+export type MemoryAuthor = {
+  authorId: string
+  role: AuthorRole
+}
+
+export type Memory = {
+  id: string
+  placeId: string
+  title: string
+  description: string
+  occurredAt: string
+  createdAt: string
+  authors: MemoryAuthor[]
+  media: MediaItem[]
+  license: string
+  sourceIssue?: string
+}
+
 export type Shop = {
   id: string
   name: string
