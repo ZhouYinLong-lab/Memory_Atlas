@@ -247,6 +247,15 @@ test('has Memory Atlas repository and contribution links', async ({ page }) => {
     'href',
     'https://github.com/ZhouYinLong-lab/Memory_Atlas/blob/master/CONTRIBUTING_AGENT.md',
   )
+
+  const repositoryBox = await link.boundingBox()
+  const contributionBox = await page.getByRole('link', { name: /Contribute a Memory/i }).boundingBox()
+  expect(repositoryBox).not.toBeNull()
+  expect(contributionBox).not.toBeNull()
+  expect(repositoryBox!.x).toBeLessThanOrEqual(30)
+  expect(repositoryBox!.y).toBeLessThanOrEqual(10)
+  expect(Math.abs(contributionBox!.x - repositoryBox!.x)).toBeLessThanOrEqual(1)
+  expect(contributionBox!.y).toBeGreaterThan(repositoryBox!.y + repositoryBox!.height + 15)
 })
 
 test('shows ordered authors first and filters shared memories', async ({ page }) => {

@@ -33,11 +33,11 @@ button { font: inherit; }
 .maplibregl-ctrl-group button { filter: invert(1); }
 .maplibregl-ctrl-attrib { background: rgba(17,17,17,0.68) !important; color: var(--paper-soft); font: 9px var(--mono); }
 .maplibregl-ctrl-attrib a { color: var(--paper); }
-.github-repo-link { position: fixed; z-index: 12; left: 18px; bottom: 74px; display: grid; place-items: center; width: 42px; height: 42px; color: var(--paper); background: rgba(17,17,17,0.86); border: 1px solid var(--paper); box-shadow: 5px 5px 0 rgba(17,17,17,0.58); transition: color 160ms ease, background 160ms ease, transform 160ms ease, opacity 160ms ease; }
-.github-repo-link svg { width: 24px; height: 24px; }
+.github-repo-link { position: fixed; z-index: 12; left: clamp(18px, 7.8vw, 28px); top: 8px; display: grid; place-items: center; width: 62px; height: 62px; color: var(--paper); background: rgba(17,17,17,0.9); border: 2px solid var(--paper); box-shadow: 6px 6px 0 rgba(17,17,17,0.58); transition: color 160ms ease, background 160ms ease, transform 160ms ease, opacity 160ms ease; }
+.github-repo-link svg { width: 34px; height: 34px; }
 .github-repo-link:hover, .github-repo-link:focus-visible { color: var(--ink); background: var(--yellow); transform: translateY(-2px); outline: none; }
-.contribute-memory-link { position: fixed; z-index: 12; left: 18px; bottom: 18px; display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 0 14px 0 10px; color: var(--ink); background: var(--yellow); border: 2px solid var(--ink); box-shadow: 5px 5px 0 var(--red); text-decoration: none; font: 12px/1 var(--display); letter-spacing: 0.05em; text-transform: uppercase; transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease; }
-.contribute-memory-link span { font: 22px/1 var(--mono); }
+.contribute-memory-link { position: fixed; z-index: 12; left: clamp(18px, 7.8vw, 28px); top: 92px; display: inline-flex; align-items: center; gap: 18px; width: min(282px, calc(100vw - 42px)); min-height: 62px; padding: 0 18px; color: var(--ink); background: var(--yellow); border: 2px solid var(--ink); box-shadow: 7px 8px 0 var(--red); text-decoration: none; font: 15px/1 var(--display); letter-spacing: 0.05em; text-transform: uppercase; transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease; }
+.contribute-memory-link span { font: 31px/1 var(--mono); }
 .contribute-memory-link:hover, .contribute-memory-link:focus-visible { transform: translateY(-2px) rotate(-1deg); box-shadow: 7px 7px 0 var(--red); outline: 2px solid var(--paper); outline-offset: 2px; }
 .app-shell.has-detail .github-repo-link, .app-shell.has-detail .contribute-memory-link { opacity: 0; pointer-events: none; }
 
@@ -157,8 +157,6 @@ button { font: inherit; }
 @keyframes lightbox-in { from { opacity: 0; } to { opacity: 1; } }
 
 @media (max-width: 840px) {
-  .github-repo-link { left: 14px; bottom: 62px; }
-  .contribute-memory-link { left: 14px; bottom: 14px; }
   .map-actions { right: 14px; bottom: 14px; }
   .bottom-strip { left: 7%; right: 7%; bottom: 6%; align-items: start; flex-direction: column; gap: 12px; }
   .route-legend { order: 3; }
@@ -179,7 +177,6 @@ button { font: inherit; }
 }
 
 @media (max-width: 520px) {
-  .contribute-memory-link { max-width: calc(100vw - 150px); padding-right: 10px; font-size: 9px; }
   .map-offscreen-guide { width: 132px; max-width: 132px; }
   .map-offscreen-guide__label strong { font-size: 10px; }
   .map-actions { left: 14px; right: 14px; justify-content: flex-end; }
