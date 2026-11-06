@@ -1,22 +1,22 @@
-# Dog Map
+# Memory Atlas
 
-[![Build](https://github.com/ZhouYinLong-lab/Dog-Map/actions/workflows/deploy-pages.yml/badge.svg?branch=master)](https://github.com/ZhouYinLong-lab/Dog-Map/actions/workflows/deploy-pages.yml)
+[![Build](https://github.com/ZhouYinLong-lab/Memory_Atlas/actions/workflows/deploy-pages.yml/badge.svg?branch=master)](https://github.com/ZhouYinLong-lab/Memory_Atlas/actions/workflows/deploy-pages.yml)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=111111)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
 [![MapLibre GL](https://img.shields.io/badge/MapLibre%20GL-5-396CB2?logo=maplibre&logoColor=white)](https://maplibre.org/)
 
-一个以南京大学苏州校区为起点的个人路线档案地图。
+一个以地点为索引、由路线、影像与共同记忆组成的静态地图档案。
 
-[在线查看 Dog Map](https://zhouyinlong-lab.github.io/Dog-Map/)
+[在线查看 Memory Atlas](https://zhouyinlong-lab.github.io/Memory_Atlas/)
 
 ## 标签
 
-`React` `TypeScript` `Vite` `MapLibre GL` `Photo Archive` `Personal Map` `P5R-inspired`
+`React` `TypeScript` `Vite` `MapLibre GL` `Photo Archive` `Shared Memory` `P5R-inspired`
 
 ## Overview / 项目简介
 
-Dog Map 用地图记录出发、抵达和路过的地点。路线和地点由内容数据驱动，点击地点后可以查看对应的标题、照片和视频。
+Memory Atlas 基于 [Dog-Map](https://github.com/ZhouYinLong-lab/Dog-Map) 渐进演化而来，保留原有地图、路线、地点和媒体内容。路线和地点继续由静态数据驱动；在地点详情下方，可以查看经过审核的多作者 Shared Memories。
 
 视觉上采用原创的黑、红、米白、黄色斜切语言，并将地点图标、路线颜色和媒体内容整合到同一张城市地图中。
 
@@ -29,6 +29,31 @@ Dog Map 用地图记录出发、抵达和路过的地点。路线和地点由内
 - 点击图片查看大图，支持背景、关闭按钮和 `Esc` 退出
 - 响应式移动端布局
 - 静态照片与可选媒体 API 两种内容来源
+- 一个地点包含多条 Memory，一条 Memory 支持主要作者、联合作者与摄影者
+- 按作者或发生时间筛选 Shared Memories
+- Agent 创建 PR 为主、GitHub Issue Form 为备用的投稿流程
+
+## 投稿、审核与发布
+
+推荐让编码 Agent 按仓库根目录的 [`CONTRIBUTING_AGENT.md`](./CONTRIBUTING_AGENT.md) 整理材料、校验静态数据并创建 PR。不能使用 Agent/PR 时，可改用 [Memory Submission Issue Form](https://github.com/ZhouYinLong-lab/Memory_Atlas/issues/new?template=memory-submission.yml)。
+
+投稿不会自动公开。管理员需要核对地点、作者许可、隐私、媒体授权、alt 文本和文件路径；审核后才把作者写入 `src/data/authors.json`、把 Memory 写入 `src/data/memories.json`，并将媒体整理到 `public/media`。只有合并或直接推送到 `master` 的内容会触发现有 GitHub Actions 构建并发布到 GitHub Pages。未写入 `memories.json` 的 Issue、草稿分支或未合并 PR 不会出现在网站上。
+
+本阶段不使用数据库、登录系统或独立服务器，也不部署 `server/` 下的 Hono API。
+
+## Memory 内容模型
+
+- `Author`：稳定 `id`、`displayName`，以及可选 `profileUrl`、`avatarUrl`。
+- `Memory`：稳定 `id`、`placeId`、标题、正文、发生/创建时间、作者角色、媒体、授权和可选来源 Issue。
+- 作者角色：`owner`、`coauthor`、`photographer`；每条 Memory 至少有一位 `owner`。
+
+提交前运行：
+
+```bash
+npm run validate:memories
+npm run build
+npm run test:e2e
+```
 
 ## Getting Started / 本地开发
 
@@ -115,7 +140,7 @@ media-originals/<地点 id>/
 ## Repository Structure / 仓库结构
 
 ```text
-Dog-Map/
+Memory-Atlas/
 ├── public/media/             # 网页使用的图片、视频和地点素材
 ├── media-originals/          # 本地原图目录，不提交到 Git
 ├── src/
@@ -125,19 +150,20 @@ Dog-Map/
 │   ├── services/             # 媒体 API 客户端
 │   └── styles/               # 全局样式和设计令牌
 ├── server/                   # 可选的媒体服务
+├── CONTRIBUTING_AGENT.md     # Agent-first Memory 投稿指南
 ├── tests/                    # Playwright 端到端测试
 └── README.md
 ```
 
 ## Contact / 问题反馈
 
-发现问题或有新的路线、地点建议，可以提交 [GitHub Issue](https://github.com/ZhouYinLong-lab/Dog-Map/issues)。
+发现问题或有新的路线、地点建议，可以提交 [GitHub Issue](https://github.com/ZhouYinLong-lab/Memory_Atlas/issues)。Memory 投稿优先使用 Agent 创建 PR。
 
 ## License / 许可证
 
 ### 项目源代码
 
-Dog Map 的原创源代码采用 [MIT License](./LICENSE)。该许可只适用于本项目原创代码，不包含图片、地图数据和第三方软件或服务。
+Memory Atlas 的原创源代码采用 [MIT License](./LICENSE)。该许可只适用于本项目原创代码，不包含图片、地图数据和第三方软件或服务。
 
 ### 图片素材
 

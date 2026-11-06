@@ -1,0 +1,92 @@
+name: Memory Submission
+description: Fallback form for proposing a memory when an Agent-authored pull request is not practical.
+title: "[Memory] "
+labels:
+  - memory-submission
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Agent-authored pull requests are preferred. Before submitting, read `CONTRIBUTING_AGENT.md`. Submitting this form does not publish the memory; a maintainer must review and commit it to the static JSON data.
+  - type: input
+    id: place-name
+    attributes:
+      label: Place name / 地点名称
+      placeholder: 南京大学苏州校区
+    validations:
+      required: true
+  - type: input
+    id: place-reference
+    attributes:
+      label: Existing place ID or map link / 已有地点 id 或地图链接
+      description: Use an existing place ID whenever possible.
+      placeholder: nju-suzhou-campus
+    validations:
+      required: true
+  - type: input
+    id: coordinates
+    attributes:
+      label: Coordinates / 坐标
+      description: Longitude, latitude. Explain the source if this is a new location.
+      placeholder: 120.387037, 31.351239
+    validations:
+      required: true
+  - type: input
+    id: memory-title
+    attributes:
+      label: Memory title / 标题
+    validations:
+      required: true
+  - type: textarea
+    id: memory-description
+    attributes:
+      label: Memory / 记忆正文
+      description: Tell the full story that may be published.
+    validations:
+      required: true
+  - type: input
+    id: occurred-at
+    attributes:
+      label: When it happened / 发生时间
+      placeholder: 2026-11-06 or an honest approximate date
+    validations:
+      required: true
+  - type: input
+    id: owner
+    attributes:
+      label: Primary author / 主要作者
+    validations:
+      required: true
+  - type: input
+    id: coauthors
+    attributes:
+      label: Coauthors / 联合作者
+      placeholder: Names and optional profile links
+  - type: input
+    id: photographer
+    attributes:
+      label: Photographer / 摄影者
+      placeholder: Names and optional profile links
+  - type: textarea
+    id: media
+    attributes:
+      label: Images or video / 图片或视频
+      description: Drag files into this field, then add meaningful alt text for every file.
+      placeholder: Upload files here and list each file's alt text.
+    validations:
+      required: true
+  - type: checkboxes
+    id: license-confirmation
+    attributes:
+      label: Content license / 内容授权确认
+      options:
+        - label: I own or am authorized to submit this content and agree to the license stated in the repository's media policy.
+          required: true
+  - type: checkboxes
+    id: privacy-confirmation
+    attributes:
+      label: Privacy / 隐私确认
+      options:
+        - label: I have permission from identifiable contributors and have removed private or unsafe location information.
+          required: true
+
