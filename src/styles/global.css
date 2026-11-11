@@ -112,10 +112,12 @@ button { font: inherit; }
 .detail-section__heading h3 { font-size: 18px; }
 .detail-section__index { color: var(--yellow); font: 9px var(--mono); letter-spacing: 0.1em; }
 .detail-section__count { margin-left: auto; color: var(--paper-soft); font: 9px var(--mono); letter-spacing: 0.06em; }
-.memory-filters { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.memory-filters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 8px; }
 .memory-filters label { display: grid; gap: 5px; color: var(--yellow); font: 8px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; }
 .memory-filters select { width: 100%; min-width: 0; padding: 8px 26px 8px 8px; color: var(--paper); background: var(--ink); border: 1px solid var(--line); border-radius: 0; font: 10px var(--body); }
 .memory-filters select:focus-visible { border-color: var(--yellow); outline: 1px solid var(--yellow); }
+.memory-filters__clear { display: block; margin: 0 0 12px auto; padding: 0; color: var(--paper-soft); background: transparent; border: 0; border-bottom: 1px solid currentColor; cursor: pointer; font: 8px var(--mono); letter-spacing: 0.05em; }
+.memory-filters__clear:hover, .memory-filters__clear:focus-visible { color: var(--yellow); outline: none; }
 .memory-list { display: grid; gap: 14px; }
 .memory-list__empty { margin: 0; padding: 12px; color: var(--paper-soft); border: 1px dashed var(--line); font: 11px/1.5 var(--body); }
 .memory-card { position: relative; padding: 15px; overflow: hidden; background: rgba(242,234,220,0.06); border: 1px solid var(--line); border-left: 4px solid var(--yellow); }
@@ -170,6 +172,9 @@ button { font: inherit; }
 .media-lightbox { position: fixed; z-index: 30; inset: 0; display: grid; place-items: center; padding: 48px; background: rgba(17,17,17,0.92); cursor: zoom-out; animation: lightbox-in 160ms ease both; }
 .media-lightbox__stage { position: relative; display: inline-grid; place-items: center; max-width: min(calc(100vw - 184px), 1400px); max-height: calc(100vh - 96px); cursor: default; }
 .media-lightbox__image { display: block; max-width: min(calc(100vw - 184px), 1400px); max-height: calc(100vh - 96px); object-fit: contain; border: 2px solid var(--paper); box-shadow: 12px 12px 0 rgba(0,0,0,0.58); }
+.media-lightbox__meta { position: absolute; right: 2px; bottom: 2px; left: 2px; display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; padding: 26px 12px 10px; color: var(--paper); background: linear-gradient(transparent, rgba(0,0,0,0.88)); pointer-events: none; }
+.media-lightbox__meta span { flex: 0 0 auto; color: var(--yellow); font: 9px var(--mono); letter-spacing: 0.08em; }
+.media-lightbox__meta p { max-width: 72%; margin: 0; text-align: right; font: 10px/1.35 var(--body); }
 .media-lightbox__close { position: absolute; top: 22px; right: 24px; z-index: 1; width: 42px; height: 42px; border: 1px solid var(--paper); color: var(--paper); background: var(--ink); cursor: pointer; font-size: 30px; line-height: 1; }
 .media-lightbox__close:hover, .media-lightbox__close:focus-visible { color: var(--ink); background: var(--paper); outline: none; }
 .media-lightbox__nav { position: fixed; top: 50%; z-index: 1; display: grid; place-items: center; width: 56px; height: 72px; padding: 0; border: 3px solid #fff; color: #fff; background: #000; cursor: pointer; transform: translateY(-50%); transition: background 160ms ease, opacity 160ms ease; }
@@ -228,9 +233,11 @@ button { font: inherit; }
   .detail-section__index { font-size: 8px; }
   .media-grid { grid-template-columns: 1fr; }
   .memory-card__media { grid-template-columns: 1fr; }
+  .memory-filters { grid-template-columns: 1fr; }
   .media-lightbox { padding: 22px; }
   .media-lightbox__stage { max-width: calc(100vw - 124px); max-height: calc(100vh - 44px); }
   .media-lightbox__image { max-width: calc(100vw - 124px); max-height: calc(100vh - 44px); }
+  .media-lightbox__meta { position: fixed; right: 64px; bottom: 12px; left: 64px; }
   .media-lightbox__close { top: 12px; right: 12px; }
   .media-lightbox__nav { width: 44px; height: 58px; }
   .media-lightbox__nav svg { width: 28px; height: 28px; }

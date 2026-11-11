@@ -17,6 +17,7 @@ type AtlasUrlState = {
   memoryId: string | null
   author: string
   time: string
+  order: 'newest' | 'oldest'
 }
 
 function readAtlasUrl(): AtlasUrlState {
@@ -33,10 +34,11 @@ function readAtlasUrl(): AtlasUrlState {
     memoryId: requestedMemory?.id ?? null,
     author: requestedAuthor && placeMemories.some((memory) => memory.authors.includes(requestedAuthor)) ? requestedAuthor : 'all',
     time: requestedTime && placeMemories.some((memory) => memory.occurredAt === requestedTime) ? requestedTime : 'all',
+    order: params.get('order') === 'oldest' ? 'oldest' : 'newest',
   }
 }
 
-function atlasHref({ placeId, memoryId = null, author = 'all', time = 'all' }: AtlasUrlState) {
+function atlasHref({ placeId, memoryId = null, author = 'all', time = 'all', order = 'newest' }: AtlasUrlState) {
   const url = new URL(window.location.href)
   url.search = ''
   url.hash = ''
@@ -44,6 +46,7 @@ function atlasHref({ placeId, memoryId = null, author = 'all', time = 'all' }: A
   if (memoryId) url.searchParams.set('memory', memoryId)
   if (author !== 'all') url.searchParams.set('author', author)
   if (time !== 'all') url.searchParams.set('time', time)
+  if (order === 'oldest') url.searchParams.set('order', order)
   return `${url.pathname}${url.search}`
 }
 
@@ -128,6 +131,10 @@ function ImageLightbox({ items, index, onClose, onNavigate }: { items: MediaItem
       <button className="media-lightbox__close" type="button" onClick={onClose} aria-label="关闭图片预览" autoFocus>×</button>
       <div className="media-lightbox__stage" onClick={(event) => event.stopPropagation()}>
         <img className="media-lightbox__image" src={item.src} alt={item.alt} decoding="async" />
+        <div className="media-lightbox__meta" aria-live="polite">
+          <span>{String(index + 1).padStart(2, '0')} / {String(items.length).padStart(2, '0')}</span>
+          <p>{item.caption ?? item.alt}</p>
+        </div>
         <button
           className="media-lightbox__nav media-lightbox__nav--previous"
           type="button"
@@ -280,7 +287,7 @@ function MemoryCard({
       </header>
       <h3>
         <a
-          href={atlasHref({ placeId: memory.placeId, memoryId: memory.id, author: 'all', time: 'all' })}
+          href={atlasHref({ placeId: memory.placeId, memoryId: memory.id, author: 'all', time: 'all', order: 'newest' })}
           onClick={(event) => {
             event.preventDefault()
             onFollowLink()
@@ -301,7 +308,7 @@ function MemoryCard({
         <span>{memory.license}</span>
         <span className="memory-card__links">
           <a
-            href={atlasHref({ placeId: memory.placeId, memoryId: memory.id, author: 'all', time: 'all' })}
+            href={atlasHref({ placeId: memory.placeId, memoryId: memory.id, author: 'all', time: 'all', order: 'newest' })}
             onClick={(event) => {
               event.preventDefault()
               onFollowLink()
@@ -329,6 +336,7 @@ function App() {
   const [focusedMemoryId, setFocusedMemoryId] = useState<string | null>(initialUrlState.memoryId)
   const [memoryAuthorFilter, setMemoryAuthorFilter] = useState(initialUrlState.author)
   const [memoryTimeFilter, setMemoryTimeFilter] = useState(initialUrlState.time)
+  const [memoryOrder, setMemoryOrder] = useState<'newest' | 'oldest'>(initialUrlState.order)
   const [contributionOpen, setContributionOpen] = useState(false)
 
   const activePlace = useMemo(
@@ -357,8 +365,11 @@ function App() {
     () => activePlaceMemories
       .filter((memory) => memoryAuthorFilter === 'all' || memory.authors.includes(memoryAuthorFilter))
       .filter((memory) => memoryTimeFilter === 'all' || memory.occurredAt === memoryTimeFilter)
-      .sort((left, right) => Date.parse(right.occurredAt) - Date.parse(left.occurredAt)),
-    [activePlaceMemories, memoryAuthorFilter, memoryTimeFilter],
+      .sort((left, right) => {
+        const delta = Date.parse(right.occurredAt) - Date.parse(left.occurredAt)
+        return memoryOrder === 'newest' ? delta : -delta
+      }),
+    [activePlaceMemories, memoryAuthorFilter, memoryOrder, memoryTimeFilter],
   )
   const authorsById = useMemo(() => new Map(authors.map((author) => [author.id, author])), [])
   const previewItems = selectedMemory
@@ -383,6 +394,7 @@ function App() {
       setFocusedMemoryId(next.memoryId)
       setMemoryAuthorFilter(next.author)
       setMemoryTimeFilter(next.time)
+      setMemoryOrder(next.order)
     }
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
@@ -423,7 +435,8 @@ function App() {
     setFocusedMemoryId(null)
     setMemoryAuthorFilter('all')
     setMemoryTimeFilter('all')
-    setAtlasUrl({ placeId, memoryId: null, author: 'all', time: 'all' })
+    setMemoryOrder('newest')
+    setAtlasUrl({ placeId, memoryId: null, author: 'all', time: 'all', order: 'newest' })
   }, [])
 
   const handleClearPlace = useCallback(() => {
@@ -431,7 +444,8 @@ function App() {
     setFocusedMemoryId(null)
     setMemoryAuthorFilter('all')
     setMemoryTimeFilter('all')
-    setAtlasUrl({ placeId: null, memoryId: null, author: 'all', time: 'all' })
+    setMemoryOrder('newest')
+    setAtlasUrl({ placeId: null, memoryId: null, author: 'all', time: 'all', order: 'newest' })
   }, [])
 
   const handleFollowMemoryLink = useCallback((memory: Memory) => {
@@ -439,20 +453,35 @@ function App() {
     setFocusedMemoryId(memory.id)
     setMemoryAuthorFilter('all')
     setMemoryTimeFilter('all')
-    setAtlasUrl({ placeId: memory.placeId, memoryId: memory.id, author: 'all', time: 'all' })
+    setMemoryOrder('newest')
+    setAtlasUrl({ placeId: memory.placeId, memoryId: memory.id, author: 'all', time: 'all', order: 'newest' })
   }, [])
 
   const handleAuthorFilter = useCallback((author: string) => {
     setMemoryAuthorFilter(author)
     setFocusedMemoryId(null)
-    setAtlasUrl({ placeId: activePlaceId, memoryId: null, author, time: memoryTimeFilter }, 'replace')
-  }, [activePlaceId, memoryTimeFilter])
+    setAtlasUrl({ placeId: activePlaceId, memoryId: null, author, time: memoryTimeFilter, order: memoryOrder }, 'replace')
+  }, [activePlaceId, memoryOrder, memoryTimeFilter])
 
   const handleTimeFilter = useCallback((time: string) => {
     setMemoryTimeFilter(time)
     setFocusedMemoryId(null)
-    setAtlasUrl({ placeId: activePlaceId, memoryId: null, author: memoryAuthorFilter, time }, 'replace')
-  }, [activePlaceId, memoryAuthorFilter])
+    setAtlasUrl({ placeId: activePlaceId, memoryId: null, author: memoryAuthorFilter, time, order: memoryOrder }, 'replace')
+  }, [activePlaceId, memoryAuthorFilter, memoryOrder])
+
+  const handleMemoryOrder = useCallback((order: 'newest' | 'oldest') => {
+    setMemoryOrder(order)
+    setFocusedMemoryId(null)
+    setAtlasUrl({ placeId: activePlaceId, memoryId: null, author: memoryAuthorFilter, time: memoryTimeFilter, order }, 'replace')
+  }, [activePlaceId, memoryAuthorFilter, memoryTimeFilter])
+
+  const handleClearMemoryFilters = useCallback(() => {
+    setMemoryAuthorFilter('all')
+    setMemoryTimeFilter('all')
+    setMemoryOrder('newest')
+    setFocusedMemoryId(null)
+    setAtlasUrl({ placeId: activePlaceId, memoryId: null, author: 'all', time: 'all', order: 'newest' }, 'replace')
+  }, [activePlaceId])
 
   const handleSelectShop = useCallback((shopId: string) => {
     setSelectedShopId(shopId)
@@ -576,7 +605,17 @@ function App() {
                         {memoryTimes.map((time) => <option key={time} value={time}>{formatOccurredAt(time)}</option>)}
                       </select>
                     </label>
+                    <label>
+                      <span>排序</span>
+                      <select value={memoryOrder} onChange={(event) => handleMemoryOrder(event.target.value as 'newest' | 'oldest')}>
+                        <option value="newest">最新在前</option>
+                        <option value="oldest">最早在前</option>
+                      </select>
+                    </label>
                   </div>
+                  {(memoryAuthorFilter !== 'all' || memoryTimeFilter !== 'all' || memoryOrder !== 'newest') && (
+                    <button className="memory-filters__clear" type="button" onClick={handleClearMemoryFilters}>清除筛选与排序</button>
+                  )}
                   <div className="memory-list">
                     {filteredMemories.map((memory) => (
                       <MemoryCard

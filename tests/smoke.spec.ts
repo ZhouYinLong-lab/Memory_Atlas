@@ -295,6 +295,13 @@ test('shows ordered authors first and filters shared memories', async ({ page })
   await sharedMemories.getByLabel('时间').selectOption('2026-08-24T10:00:11+08:00')
   await expect(sharedMemories.locator('.memory-card')).toHaveCount(1)
   await expect(sharedMemories.getByRole('heading', { name: '骑车初遇：沿校园前行' })).toBeVisible()
+
+  await sharedMemories.getByRole('button', { name: '清除筛选与排序' }).click()
+  await sharedMemories.getByLabel('排序').selectOption('oldest')
+  await expect(sharedMemories.locator('.memory-card').first()).toHaveAttribute('data-memory-id', 'nju-suzhou-first-ride-20260824')
+  await expect(page).toHaveURL(/order=oldest/)
+  await page.reload()
+  await expect(page.getByRole('region', { name: 'Shared Memories' }).getByLabel('排序')).toHaveValue('oldest')
 })
 
 test('restores stable place and memory links across reload and history', async ({ page }) => {
