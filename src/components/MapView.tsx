@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { GeoJSONSource, Map, Marker } from 'maplibre-gl'
+import mapLibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import type { Place, Route } from '../types/content'
 import { getRouteColor, getRouteColorMap } from '../map/routePalette'
 import { resolveMapStyle } from '../map/mapStyles'
@@ -309,6 +310,7 @@ export function MapView({
     void Promise.all([import('maplibre-gl'), resolveMapStyle()]).then(([maplibregl, { style, mode }]) => {
       if (disposed || !mapContainerRef.current) return
       mapLibreRef.current = maplibregl
+      maplibregl.setWorkerUrl(mapLibreWorkerUrl)
 
       const initialZoom = mode === 'vector' ? 13.2 : 11.4
       markerReferenceZoomRef.current = initialZoom

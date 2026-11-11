@@ -30,7 +30,12 @@ Memory Atlas 基于 [Dog-Map](https://github.com/ZhouYinLong-lab/Dog-Map) 渐进
 - 响应式移动端布局
 - 静态照片与可选媒体 API 两种内容来源
 - 一个地点包含多条 Memory，一条 Memory 支持按展示顺序排列的多位平等作者
-- 按作者或发生时间筛选 Shared Memories
+- 按作者或发生时间筛选 Shared Memories，并支持新旧排序与 URL 状态恢复
+- 地点与 Memory 稳定直达链接，可刷新、分享和使用浏览器前进后退
+- Memory 图片灯箱、顺序切换、计数和具体图片说明
+- 站内 Agent 投稿面板，可一键复制规范提示词并打开完整指南
+- 本地 Memory JSON 草稿生成器，不自动发布内容
+- GitHub Pages SEO、分享卡、站点清单和自定义 404
 - Agent 创建 PR 为主、GitHub Issue Form 为备用的投稿流程
 
 ## 投稿、审核与发布

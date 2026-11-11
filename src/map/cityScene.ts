@@ -1,10 +1,11 @@
 import type { Map } from 'maplibre-gl'
+import type { AllPaintProperties } from '@maplibre/maplibre-gl-style-spec'
 
 export const terrainSourceUrl = import.meta.env.VITE_TERRAIN_SOURCE_URL?.trim()
   || 'https://tiles.mapterhorn.com/tilejson.json'
 export const terrainEnabled = import.meta.env.VITE_ENABLE_TERRAIN === 'true'
 
-function setPaintIfLayer(map: Map, layerId: string, property: string, value: unknown) {
+function setPaintIfLayer<K extends keyof AllPaintProperties>(map: Map, layerId: string, property: K, value: AllPaintProperties[K]) {
   if (map.getLayer(layerId)) map.setPaintProperty(layerId, property, value)
 }
 

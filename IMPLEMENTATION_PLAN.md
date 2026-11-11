@@ -1,4 +1,4 @@
-# Memory Atlas MVP Implementation Plan
+# Memory Atlas V1 Implementation Plan
 
 ## Goal
 
@@ -34,7 +34,7 @@ Evolve Dog-Map into the static GitHub Pages–hosted Memory Atlas MVP without re
 - Final: `npm run test:e2e` finished with 49 passed and 1 intentionally skipped mobile API duplicate, including Jinji Lake author attribution.
 - Visual check completed for desktop and mobile Shared Memories layouts. A mobile fixed-button overlap found during testing was corrected and regression-tested.
 - GitHub Pages is enabled for `ZhouYinLong-lab/Memory_Atlas`; the production deployment and live media-path check succeeded.
-- `npm audit --omit=dev` reports two moderate Hono advisories (the server is not deployed) and one critical MapLibre advisory whose automatic fix requires a major-version upgrade; schedule that upgrade with map regression testing.
+- MapLibre was upgraded to 6.17.0 with the documented Vite worker bundle setup; optional undeployed server packages are development-only. `npm audit --omit=dev` reports zero production vulnerabilities.
 
 ## Scope boundaries
 
@@ -53,3 +53,17 @@ Evolve Dog-Map into the static GitHub Pages–hosted Memory Atlas MVP without re
 - [x] Update the fallback Issue Form and contributor documentation.
 
 Verification on 2026-11-06: `npm run build` passed with 3 memories, 2 authors, and 363 media derivatives; `npm run test:e2e` finished with 50 passed and 2 intentional duplicate-project skips.
+
+## V1 completion
+
+- [x] Add stable query-parameter links for places and individual Memories.
+- [x] Restore place, Memory, author, time, and sort state after refresh and browser history navigation.
+- [x] Add oldest/newest ordering, clear-filter action, and richer image-lightbox context.
+- [x] Add an in-site Agent intake panel with a copyable prompt, full guide link, and Issue fallback.
+- [x] Add a non-publishing Memory JSON draft generator with place, author, date, media, and alt validation.
+- [x] Document calendar-day/date-time rules, grounded generated copy, consent, privacy, and publication gates.
+- [x] Add canonical/social metadata, a 1200×630 share card, web manifest, robots, sitemap, custom 404, skip link, and map loading/error states.
+- [x] Upgrade MapLibre to the non-vulnerable 6.17 line and configure its Vite worker explicitly.
+- [x] Preserve the static GitHub Pages architecture, legacy Place content, and manual maintainer review.
+
+V1 verification on 2026-11-11: production dependency audit reports zero vulnerabilities; build and optional server typecheck pass after validating 19 places, 3 memories, 2 authors, and 363 media derivatives. The full Playwright run finished with 57 passed and 3 intentional mobile duplicate-project skips. GitHub Pages deployment and live-site checks are the final publication gate.
