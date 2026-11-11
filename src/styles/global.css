@@ -97,6 +97,7 @@ button { font: inherit; }
 .memory-list { display: grid; gap: 14px; }
 .memory-list__empty { margin: 0; padding: 12px; color: var(--paper-soft); border: 1px dashed var(--line); font: 11px/1.5 var(--body); }
 .memory-card { position: relative; padding: 15px; overflow: hidden; background: rgba(242,234,220,0.06); border: 1px solid var(--line); border-left: 4px solid var(--yellow); }
+.memory-card.is-focused { border-color: var(--yellow); border-left-color: var(--red); box-shadow: 0 0 0 2px rgba(244,198,54,0.28); }
 .memory-card::after { content: ''; position: absolute; top: 0; right: 0; width: 24px; height: 24px; background: var(--red); clip-path: polygon(100% 0, 100% 100%, 0 0); }
 .memory-card__author-line { margin: 0 24px 11px 0; color: var(--paper); font: 14px/1.2 var(--display); letter-spacing: 0.04em; }
 .memory-card__author-line a { color: inherit; text-underline-offset: 3px; }
@@ -104,12 +105,15 @@ button { font: inherit; }
 .memory-card__header { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--yellow); font: 8px/1.2 var(--mono); letter-spacing: 0.05em; }
 .memory-card__header span { overflow: hidden; color: var(--paper-soft); text-overflow: ellipsis; white-space: nowrap; }
 .memory-card h3 { margin: 10px 0 12px; color: var(--paper); font: 24px/1 var(--display); letter-spacing: 0.03em; }
+.memory-card h3 a { color: inherit; text-decoration: none; }
+.memory-card h3 a:hover, .memory-card h3 a:focus-visible { color: var(--yellow); text-decoration: underline; text-underline-offset: 4px; outline: none; }
 .memory-card > p { margin: 13px 0; color: var(--paper-soft); font: 13px/1.6 var(--body); }
 .memory-card__media { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
 .memory-card__media:has(> :only-child) { grid-template-columns: 1fr; }
 .memory-card__media .media-block, .memory-card__media .media-error { min-height: 110px; max-height: 220px; }
 .memory-card__footer { display: flex; justify-content: space-between; gap: 10px; margin-top: 12px; padding-top: 9px; color: var(--paper-soft); border-top: 1px solid var(--line); font: 8px var(--mono); letter-spacing: 0.05em; }
 .memory-card__footer a { color: var(--yellow); }
+.memory-card__links { display: inline-flex; gap: 10px; }
 .shop-list { display: grid; gap: 12px; }
 .shop-card { display: grid; grid-template-columns: 100px minmax(0, 1fr); width: 100%; padding: 0; overflow: hidden; color: var(--paper); text-align: left; background: rgba(17,17,17,0.64); border: 1px solid var(--line); border-left: 4px solid var(--red); cursor: pointer; transition: transform 160ms ease, border-color 160ms ease, background 160ms ease; }
 .shop-card:hover, .shop-card:focus-visible { background: rgba(17,17,17,0.94); border-color: var(--paper); transform: translateX(-3px) rotate(-0.5deg); outline: none; }

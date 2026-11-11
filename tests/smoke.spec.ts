@@ -284,6 +284,35 @@ test('shows ordered authors first and filters shared memories', async ({ page })
   await expect(sharedMemories.getByRole('heading', { name: '骑车初遇：沿校园前行' })).toBeVisible()
 })
 
+test('restores stable place and memory links across reload and history', async ({ page }) => {
+  await page.goto('/?place=jinji-lake&memory=jinji-lake-city-lights-20261018')
+  await expect(page.getByRole('complementary', { name: '金鸡湖详情' })).toBeVisible()
+  const memory = page.locator('[data-memory-id="jinji-lake-city-lights-20261018"]')
+  await expect(memory).toHaveClass(/is-focused/)
+  await expect(page).toHaveTitle('金鸡湖 · Memory Atlas')
+
+  await page.reload()
+  await expect(page.getByRole('complementary', { name: '金鸡湖详情' })).toBeVisible()
+  await expect(memory).toHaveClass(/is-focused/)
+
+  await page.getByRole('button', { name: '关闭详情' }).click()
+  await expect(page).toHaveURL(/\/$/)
+  await page.goBack()
+  await expect(page.getByRole('complementary', { name: '金鸡湖详情' })).toBeVisible()
+  await expect(memory).toHaveClass(/is-focused/)
+})
+
+test('uses memory titles and footer links as stable permalinks', async ({ page }) => {
+  await page.goto('/?place=nju-suzhou-campus')
+  const card = page.locator('[data-memory-id="nju-suzhou-first-ride-20260824"]')
+  const titleLink = card.getByRole('link', { name: '骑车初遇：抵达校区', exact: true })
+  await expect(titleLink).toHaveAttribute('href', /\?place=nju-suzhou-campus&memory=nju-suzhou-first-ride-20260824$/)
+  await titleLink.click()
+  await expect(page).toHaveURL(/\?place=nju-suzhou-campus&memory=nju-suzhou-first-ride-20260824$/)
+  await expect(card).toHaveClass(/is-focused/)
+  await expect(card.getByRole('link', { name: '打开记忆永久链接：骑车初遇：抵达校区' })).toHaveAttribute('href', /memory=nju-suzhou-first-ride-20260824$/)
+})
+
 test('hides the shared memories section for places without committed memories', async ({ page }) => {
   await page.goto('/')
   const nightMarketMarker = page.getByRole('button', { name: '打开地点：东渚夜市与街道' })

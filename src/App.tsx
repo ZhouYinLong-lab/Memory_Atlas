@@ -7,6 +7,45 @@ import { artworkDataUri } from './map/artwork'
 
 const repositoryUrl = 'https://github.com/ZhouYinLong-lab/Memory_Atlas'
 const contributionGuideUrl = `${repositoryUrl}/blob/master/CONTRIBUTING_AGENT.md`
+
+type AtlasUrlState = {
+  placeId: string | null
+  memoryId: string | null
+  author: string
+  time: string
+}
+
+function readAtlasUrl(): AtlasUrlState {
+  const params = new URLSearchParams(window.location.search)
+  const requestedMemory = memories.find((memory) => memory.id === params.get('memory')) ?? null
+  const requestedPlace = places.find((place) => place.id === params.get('place')) ?? null
+  const placeId = requestedMemory?.placeId ?? requestedPlace?.id ?? null
+  const placeMemories = memories.filter((memory) => memory.placeId === placeId)
+  const requestedAuthor = params.get('author')
+  const requestedTime = params.get('time')
+
+  return {
+    placeId,
+    memoryId: requestedMemory?.id ?? null,
+    author: requestedAuthor && placeMemories.some((memory) => memory.authors.includes(requestedAuthor)) ? requestedAuthor : 'all',
+    time: requestedTime && placeMemories.some((memory) => memory.occurredAt === requestedTime) ? requestedTime : 'all',
+  }
+}
+
+function atlasHref({ placeId, memoryId = null, author = 'all', time = 'all' }: AtlasUrlState) {
+  const url = new URL(window.location.href)
+  url.search = ''
+  url.hash = ''
+  if (placeId) url.searchParams.set('place', placeId)
+  if (memoryId) url.searchParams.set('memory', memoryId)
+  if (author !== 'all') url.searchParams.set('author', author)
+  if (time !== 'all') url.searchParams.set('time', time)
+  return `${url.pathname}${url.search}`
+}
+
+function setAtlasUrl(state: AtlasUrlState, method: 'push' | 'replace' = 'push') {
+  window.history[`${method}State`]({}, '', atlasHref(state))
+}
 function thumbnailSource(item: MediaItem) {
   if (item.thumbnail) return item.thumbnail
   if (item.src.includes('/media/') && item.type === 'image' && /\.webp$/i.test(item.src)) {
@@ -145,17 +184,21 @@ function MemoryCard({
   memory,
   authorsById,
   onPreview,
+  onFollowLink,
+  isFocused,
 }: {
   memory: Memory
   authorsById: Map<string, Author>
   onPreview: (index: number) => void
+  onFollowLink: () => void
+  isFocused: boolean
 }) {
   const memoryAuthors = memory.authors
     .map((authorId) => authorsById.get(authorId))
     .filter((author): author is Author => Boolean(author))
 
   return (
-    <article className="memory-card" id={`memory-${memory.id}`} data-memory-id={memory.id}>
+    <article className={`memory-card ${isFocused ? 'is-focused' : ''}`} id={`memory-${memory.id}`} data-memory-id={memory.id}>
       <div className="memory-card__author-line">
         {memoryAuthors.map((author, index) => (
           <span key={author.id}>
@@ -170,7 +213,17 @@ function MemoryCard({
         <time dateTime={memory.occurredAt}>{formatOccurredAt(memory.occurredAt)}</time>
         <span>{memory.id}</span>
       </header>
-      <h3>{memory.title}</h3>
+      <h3>
+        <a
+          href={atlasHref({ placeId: memory.placeId, memoryId: memory.id, author: 'all', time: 'all' })}
+          onClick={(event) => {
+            event.preventDefault()
+            onFollowLink()
+          }}
+        >
+          {memory.title}
+        </a>
+      </h3>
       <p>{memory.description}</p>
       {memory.media.length > 0 && (
         <div className="memory-card__media">
@@ -181,22 +234,36 @@ function MemoryCard({
       )}
       <footer className="memory-card__footer">
         <span>{memory.license}</span>
-        {memory.sourceIssue && <a href={memory.sourceIssue} target="_blank" rel="noreferrer">SOURCE ↗</a>}
+        <span className="memory-card__links">
+          <a
+            href={atlasHref({ placeId: memory.placeId, memoryId: memory.id, author: 'all', time: 'all' })}
+            onClick={(event) => {
+              event.preventDefault()
+              onFollowLink()
+            }}
+            aria-label={`打开记忆永久链接：${memory.title}`}
+          >
+            LINK ↗
+          </a>
+          {memory.sourceIssue && <a href={memory.sourceIssue} target="_blank" rel="noreferrer">SOURCE ↗</a>}
+        </span>
       </footer>
     </article>
   )
 }
 
 function App() {
-  const [activePlaceId, setActivePlaceId] = useState<string | null>(null)
+  const [initialUrlState] = useState(readAtlasUrl)
+  const [activePlaceId, setActivePlaceId] = useState<string | null>(initialUrlState.placeId)
   const [hoveredPlaceId, setHoveredPlaceId] = useState<string | null>(null)
   const [activeRouteId, setActiveRouteId] = useState<string | null>(routes[0]?.id ?? null)
   const [remoteMedia, setRemoteMedia] = useState<Record<string, MediaItem[]>>({})
   const [previewIndex, setPreviewIndex] = useState<number | null>(null)
   const [selectedShopId, setSelectedShopId] = useState<string | null>(null)
   const [selectedMemoryId, setSelectedMemoryId] = useState<string | null>(null)
-  const [memoryAuthorFilter, setMemoryAuthorFilter] = useState('all')
-  const [memoryTimeFilter, setMemoryTimeFilter] = useState('all')
+  const [focusedMemoryId, setFocusedMemoryId] = useState<string | null>(initialUrlState.memoryId)
+  const [memoryAuthorFilter, setMemoryAuthorFilter] = useState(initialUrlState.author)
+  const [memoryTimeFilter, setMemoryTimeFilter] = useState(initialUrlState.time)
 
   const activePlace = useMemo(
     () => places.find((place) => place.id === activePlaceId) ?? null,
@@ -241,9 +308,30 @@ function App() {
     setSelectedShopId(null)
     setSelectedMemoryId(null)
     setPreviewIndex(null)
-    setMemoryAuthorFilter('all')
-    setMemoryTimeFilter('all')
   }, [activePlaceId])
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const next = readAtlasUrl()
+      setActivePlaceId(next.placeId)
+      setFocusedMemoryId(next.memoryId)
+      setMemoryAuthorFilter(next.author)
+      setMemoryTimeFilter(next.time)
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
+  useEffect(() => {
+    if (!focusedMemoryId || !activePlace) return
+    const targetMemory = memories.find((memory) => memory.id === focusedMemoryId)
+    if (!targetMemory || targetMemory.placeId !== activePlace.id) return
+
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById(`memory-${focusedMemoryId}`)?.scrollIntoView({ block: 'center' })
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [activePlace, focusedMemoryId, filteredMemories])
 
   useEffect(() => {
     if (!activePlace) return
@@ -256,17 +344,49 @@ function App() {
     return () => controller.abort()
   }, [activePlace])
 
+  useEffect(() => {
+    document.title = activePlace ? `${activePlace.title} · Memory Atlas` : 'Memory Atlas'
+  }, [activePlace])
+
   const handleHoverPlace = useCallback((placeId: string | null) => {
     setHoveredPlaceId(placeId)
   }, [])
 
   const handleSelectPlace = useCallback((placeId: string) => {
     setActivePlaceId(placeId)
+    setFocusedMemoryId(null)
+    setMemoryAuthorFilter('all')
+    setMemoryTimeFilter('all')
+    setAtlasUrl({ placeId, memoryId: null, author: 'all', time: 'all' })
   }, [])
 
   const handleClearPlace = useCallback(() => {
     setActivePlaceId(null)
+    setFocusedMemoryId(null)
+    setMemoryAuthorFilter('all')
+    setMemoryTimeFilter('all')
+    setAtlasUrl({ placeId: null, memoryId: null, author: 'all', time: 'all' })
   }, [])
+
+  const handleFollowMemoryLink = useCallback((memory: Memory) => {
+    setActivePlaceId(memory.placeId)
+    setFocusedMemoryId(memory.id)
+    setMemoryAuthorFilter('all')
+    setMemoryTimeFilter('all')
+    setAtlasUrl({ placeId: memory.placeId, memoryId: memory.id, author: 'all', time: 'all' })
+  }, [])
+
+  const handleAuthorFilter = useCallback((author: string) => {
+    setMemoryAuthorFilter(author)
+    setFocusedMemoryId(null)
+    setAtlasUrl({ placeId: activePlaceId, memoryId: null, author, time: memoryTimeFilter }, 'replace')
+  }, [activePlaceId, memoryTimeFilter])
+
+  const handleTimeFilter = useCallback((time: string) => {
+    setMemoryTimeFilter(time)
+    setFocusedMemoryId(null)
+    setAtlasUrl({ placeId: activePlaceId, memoryId: null, author: memoryAuthorFilter, time }, 'replace')
+  }, [activePlaceId, memoryAuthorFilter])
 
   const handleSelectShop = useCallback((shopId: string) => {
     setSelectedShopId(shopId)
@@ -307,7 +427,7 @@ function App() {
 
       {activePlace && (
         <aside className="detail-drawer" aria-label={`${activePlace.title}详情`}>
-          <button className="detail-drawer__close" type="button" onClick={() => setActivePlaceId(null)} aria-label="关闭详情">×</button>
+          <button className="detail-drawer__close" type="button" onClick={handleClearPlace} aria-label="关闭详情">×</button>
           <div className="detail-drawer__identity" aria-label={activePlace.title}>
             <img
               className="detail-drawer__identity-icon"
@@ -378,14 +498,14 @@ function App() {
                   <div className="memory-filters" aria-label="记忆筛选">
                     <label>
                       <span>作者</span>
-                      <select value={memoryAuthorFilter} onChange={(event) => setMemoryAuthorFilter(event.target.value)}>
+                      <select value={memoryAuthorFilter} onChange={(event) => handleAuthorFilter(event.target.value)}>
                         <option value="all">全部作者</option>
                         {memoryAuthors.map((author) => <option key={author.id} value={author.id}>{author.displayName}</option>)}
                       </select>
                     </label>
                     <label>
                       <span>时间</span>
-                      <select value={memoryTimeFilter} onChange={(event) => setMemoryTimeFilter(event.target.value)}>
+                      <select value={memoryTimeFilter} onChange={(event) => handleTimeFilter(event.target.value)}>
                         <option value="all">全部时间</option>
                         {memoryTimes.map((time) => <option key={time} value={time}>{formatOccurredAt(time)}</option>)}
                       </select>
@@ -398,6 +518,8 @@ function App() {
                         memory={memory}
                         authorsById={authorsById}
                         onPreview={(index) => handlePreviewMemoryMedia(memory.id, index)}
+                        onFollowLink={() => handleFollowMemoryLink(memory)}
+                        isFocused={focusedMemoryId === memory.id}
                       />
                     ))}
                     {filteredMemories.length === 0 && <p className="memory-list__empty">没有符合当前筛选条件的记忆。</p>}
