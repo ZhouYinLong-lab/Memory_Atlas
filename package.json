@@ -11,6 +11,7 @@
     "typecheck:server": "tsc -p tsconfig.server.json --noEmit",
     "server:dev": "tsx server/index.ts",
     "prepare:memory-media": "node scripts/prepare-memory-media.mjs",
+    "draft:memory": "node scripts/create-memory-draft.mjs",
     "assets:derive": "node scripts/generate-media-derivatives.mjs",
     "validate:media": "node scripts/validate-media-derivatives.mjs",
     "validate:places": "node scripts/validate-place-coordinates.mjs",

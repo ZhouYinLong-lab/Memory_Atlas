@@ -18,6 +18,8 @@ for (const [index, author] of authors.entries()) {
   if (authorIds.has(author?.id)) errors.push(`${label}: duplicate author id`)
   authorIds.add(author?.id)
   if (!nonEmptyString(author?.displayName)) errors.push(`${label}: displayName is required`)
+  if (author?.profileUrl !== undefined && !validHttpUrl(author.profileUrl)) errors.push(`${label}: profileUrl must be an http(s) URL`)
+  if (author?.avatarUrl !== undefined) validatePublicMediaPath(author.avatarUrl, `${label}.avatarUrl`)
 }
 
 for (const [index, memory] of memories.entries()) {
@@ -30,9 +32,10 @@ for (const [index, memory] of memories.entries()) {
   if (!placeIds.has(memory?.placeId)) errors.push(`${label}: placeId "${memory?.placeId ?? ''}" does not exist`)
   if (!nonEmptyString(memory?.title)) errors.push(`${label}: title is required`)
   if (!nonEmptyString(memory?.description)) errors.push(`${label}: description is required`)
-  if (!validDate(memory?.occurredAt)) errors.push(`${label}: occurredAt must be a valid ISO-style date or date-time`)
-  if (!validDate(memory?.createdAt)) errors.push(`${label}: createdAt must be a valid ISO-style date or date-time`)
+  if (!validOccurredAt(memory?.occurredAt)) errors.push(`${label}: occurredAt must be YYYY-MM-DD or an ISO date-time with a timezone`)
+  if (!validDateTime(memory?.createdAt)) errors.push(`${label}: createdAt must be an ISO date-time with a timezone`)
   if (!nonEmptyString(memory?.license)) errors.push(`${label}: license is required`)
+  if (memory?.sourceIssue !== undefined && !validHttpUrl(memory.sourceIssue)) errors.push(`${label}: sourceIssue must be an http(s) URL`)
 
   if (!Array.isArray(memory?.authors) || memory.authors.length === 0) {
     errors.push(`${label}: authors must contain at least one contributor`)
@@ -84,8 +87,23 @@ function nonEmptyString(value) {
   return typeof value === 'string' && value.trim().length > 0
 }
 
-function validDate(value) {
-  return nonEmptyString(value) && /^\d{4}-\d{2}-\d{2}(?:T.+)?$/.test(value) && Number.isFinite(Date.parse(value))
+function validOccurredAt(value) {
+  return nonEmptyString(value) && (/^\d{4}-\d{2}-\d{2}$/.test(value) || validDateTime(value)) && Number.isFinite(Date.parse(value))
+}
+
+function validDateTime(value) {
+  return nonEmptyString(value)
+    && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:\d{2})$/.test(value)
+    && Number.isFinite(Date.parse(value))
+}
+
+function validHttpUrl(value) {
+  if (!nonEmptyString(value)) return false
+  try {
+    return ['http:', 'https:'].includes(new URL(value).protocol)
+  } catch {
+    return false
+  }
 }
 
 function validatePublicMediaPath(value, label) {

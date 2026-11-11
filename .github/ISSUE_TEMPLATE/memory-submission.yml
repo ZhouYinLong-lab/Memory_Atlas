@@ -45,7 +45,8 @@ body:
     id: occurred-at
     attributes:
       label: When it happened / 发生时间
-      placeholder: 2026-11-06 or an honest approximate date
+      description: Give an honest calendar day or an ISO date-time with timezone. If you do not know the day, say so in the submission instead of inventing one; the maintainer will ask before publication.
+      placeholder: 2026-11-06 or 2026-11-06T14:30:00+08:00
     validations:
       required: true
   - type: input

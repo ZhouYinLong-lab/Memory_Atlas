@@ -146,6 +146,14 @@ npm run assets:derive
 
 第一条命令会自动旋转、移除元数据，并输出最长边不超过 2048px、质量 82 的 WebP；第二条命令为 Memory 图片生成 960px 缩略图。
 
+图片处理完成后，可用本地草稿工具生成经过基础检查的 Memory JSON（只输出草稿，不会自动写入或发布）：
+
+```bash
+npm run draft:memory -- --place <place-id> --id <memory-id> --authors <id,id> --occurred-at <ISO> --title "<title>" --description "<text>" --media </media/file.webp> --alt "<alt text>"
+```
+
+日期精度、未知时间、内容授权、人物同意和隐私检查见 [`docs/memory-content-policy.md`](./docs/memory-content-policy.md)。
+
 ## Repository Structure / 仓库结构
 
 ```text

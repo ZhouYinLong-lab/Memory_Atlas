@@ -1,5 +1,7 @@
 # Contribute a Memory with an Agent
 
+> Copy/paste prompt: Update a Memory in this Memory Atlas repository. Follow `CONTRIBUTING_AGENT.md` and `docs/memory-content-policy.md`; confirm an existing place from my images and context, require my ordered authors and occurrence date, generate only grounded missing text and alt text, convert images to WebP, validate, test, and prepare a pull request. Stop and ask if the place, authors, or date cannot be confirmed.
+
 Memory Atlas accepts reviewed memories as pull requests. This is the primary contribution path: give your coding agent this repository URL, the memory details, and the instruction **“follow `CONTRIBUTING_AGENT.md` and prepare a pull request.”**
 
 Copy this prompt to your Agent and attach the images:
@@ -63,9 +65,19 @@ If you cannot use an agent or submit a PR, use the fallback [Memory Submission I
    }
    ```
 
+   To generate a checked JSON object instead of assembling it manually, run:
+
+   ```bash
+   npm run draft:memory -- --place <place-id> --id <memory-id> --authors <id,id> --occurred-at <ISO> --title "<title>" --description "<text>" --media </media/file.webp> --alt "<alt text>"
+   ```
+
+   This command prints a draft to standard output. It deliberately does not edit `memories.json` or publish anything. Review the output before appending it.
+
 6. Run `npm run assets:derive`, `npm run validate:memories`, and `npm run build`.
 7. Run `npm run test:e2e` when the local environment supports Playwright.
 8. Open a PR titled `memory: <title> at <place>`. In the description, list the ordered authors, place evidence, privacy review, media license, affected `placeId`, and validation results.
+
+Use [`docs/memory-content-policy.md`](./docs/memory-content-policy.md) for date precision, generated-copy, consent, privacy, and publication rules.
 
 ## Review and publication
 

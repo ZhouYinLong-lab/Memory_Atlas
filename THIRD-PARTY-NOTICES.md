@@ -14,4 +14,4 @@
 
 当矢量地图服务不可用时，项目会回退到 [OpenStreetMap 标准瓦片服务](https://tile.openstreetmap.org/)。该模式同样适用 OpenStreetMap 的署名与 ODbL 要求，完整说明见 [OpenStreetMap Copyright](https://www.openstreetmap.org/copyright)。
 
-这些第三方许可和来源声明不改变 Dog Map 自有源代码或图片素材的许可范围。
+这些第三方许可和来源声明不改变 Memory Atlas 自有源代码或图片素材的许可范围。
