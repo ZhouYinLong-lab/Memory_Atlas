@@ -239,23 +239,36 @@ test('opens Ufun Plaza and its separate Liulang Paopao shop gallery', async ({ p
   await expect(drawer.locator('.media-preview-trigger')).toHaveCount(2)
 })
 
-test('has Memory Atlas repository and contribution links', async ({ page }) => {
+test('has Memory Atlas repository and an Agent contribution panel', async ({ page, context }) => {
   await page.goto('/')
   const link = page.getByRole('link', { name: '打开 Memory Atlas GitHub 仓库' })
   await expect(link).toHaveAttribute('href', 'https://github.com/ZhouYinLong-lab/Memory_Atlas')
-  await expect(page.getByRole('link', { name: /Contribute a Memory/i })).toHaveAttribute(
-    'href',
-    'https://github.com/ZhouYinLong-lab/Memory_Atlas/blob/master/CONTRIBUTING_AGENT.md',
-  )
+  const contributionButton = page.getByRole('button', { name: /Contribute a Memory/i })
 
   const repositoryBox = await link.boundingBox()
-  const contributionBox = await page.getByRole('link', { name: /Contribute a Memory/i }).boundingBox()
+  const contributionBox = await contributionButton.boundingBox()
   expect(repositoryBox).not.toBeNull()
   expect(contributionBox).not.toBeNull()
   expect(repositoryBox!.x).toBeLessThanOrEqual(30)
   expect(repositoryBox!.y).toBeLessThanOrEqual(10)
   expect(Math.abs(contributionBox!.x - repositoryBox!.x)).toBeLessThanOrEqual(1)
   expect(contributionBox!.y).toBeGreaterThan(repositoryBox!.y + repositoryBox!.height + 15)
+
+  await contributionButton.click()
+  const panel = page.getByRole('dialog', { name: 'Contribute a Memory' })
+  await expect(panel).toBeVisible()
+  await expect(panel.getByRole('link', { name: /打开完整 Agent 指南/ })).toHaveAttribute(
+    'href',
+    'https://github.com/ZhouYinLong-lab/Memory_Atlas/blob/master/CONTRIBUTING_AGENT.md',
+  )
+  await expect(panel.getByText(/只有合并进 memories.json 的内容才会公开/)).toBeVisible()
+
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+  await panel.getByRole('button', { name: '复制 Agent 提示词' }).click()
+  await expect(panel.getByRole('button', { name: /已复制提示词/ })).toBeVisible()
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('Follow CONTRIBUTING_AGENT.md')
+  await page.keyboard.press('Escape')
+  await expect(panel).toHaveCount(0)
 })
 
 test('shows ordered authors first and filters shared memories', async ({ page }) => {

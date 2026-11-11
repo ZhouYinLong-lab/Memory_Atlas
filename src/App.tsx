@@ -7,6 +7,10 @@ import { artworkDataUri } from './map/artwork'
 
 const repositoryUrl = 'https://github.com/ZhouYinLong-lab/Memory_Atlas'
 const contributionGuideUrl = `${repositoryUrl}/blob/master/CONTRIBUTING_AGENT.md`
+const contributionIssueUrl = `${repositoryUrl}/issues/new?template=memory-submission.yml`
+const agentContributionPrompt = `Update a Memory in this Memory Atlas repository: ${repositoryUrl}
+
+Follow CONTRIBUTING_AGENT.md. Inspect my images, EXIF, context, and src/data/places.json to confirm an existing placeId before editing. If the place is uncertain, stop and ask me; never guess or create a Place. Require my ordered author list and an occurrence time, generate grounded title/body only when omitted, always write specific alt text, convert images to WebP with the repository command, update the static JSON, validate, build, test, and prepare a pull request. Do not publish unreviewed content or add a database, login, or server dependency.`
 
 type AtlasUrlState = {
   placeId: string | null
@@ -151,6 +155,67 @@ function ImageLightbox({ items, index, onClose, onNavigate }: { items: MediaItem
   )
 }
 
+function ContributionPanel({ onClose }: { onClose: () => void }) {
+  const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'failed'>('idle')
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose()
+    }
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [onClose])
+
+  const copyPrompt = async () => {
+    try {
+      await navigator.clipboard.writeText(agentContributionPrompt)
+      setCopyStatus('copied')
+    } catch {
+      setCopyStatus('failed')
+    }
+  }
+
+  return (
+    <div
+      className="contribution-overlay"
+      role="presentation"
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose()
+      }}
+    >
+      <section className="contribution-panel" role="dialog" aria-modal="true" aria-labelledby="contribution-title">
+        <button className="contribution-panel__close" type="button" onClick={onClose} aria-label="关闭投稿指南" autoFocus>×</button>
+        <span className="contribution-panel__eyebrow">AGENT-ASSISTED CONTRIBUTION</span>
+        <h2 id="contribution-title">Contribute a Memory</h2>
+        <p>把原始图片和下面的提示词交给编码 Agent。Agent 会先确认地图中已有地点，再整理图片、内容和 PR。</p>
+
+        <ol className="contribution-steps">
+          <li><strong>准备材料</strong><span>原始图片、作者显示顺序、发生时间，以及地点线索。</span></li>
+          <li><strong>交给 Agent</strong><span>复制提示词；标题或正文未提供时，Agent 会根据图片生成不虚构的文本。</span></li>
+          <li><strong>审核后发布</strong><span>管理员审核 PR；只有合并进 memories.json 的内容才会公开。</span></li>
+        </ol>
+
+        <label className="agent-prompt">
+          <span>可直接交给 Agent 的提示词</span>
+          <textarea readOnly value={agentContributionPrompt} rows={8} />
+        </label>
+        <div className="contribution-panel__actions">
+          <button className="contribution-panel__copy" type="button" onClick={copyPrompt}>
+            {copyStatus === 'copied' ? '已复制提示词 ✓' : copyStatus === 'failed' ? '复制失败，请手动选择' : '复制 Agent 提示词'}
+          </button>
+          <a href={contributionGuideUrl} target="_blank" rel="noreferrer">打开完整 Agent 指南 ↗</a>
+          <a href={contributionIssueUrl} target="_blank" rel="noreferrer">无法使用 Agent？改用 Issue ↗</a>
+        </div>
+      </section>
+    </div>
+  )
+}
+
 function ShopCard({ shop, onOpen }: { shop: Shop; onOpen: () => void }) {
   const cover = shop.media[0]
 
@@ -264,6 +329,7 @@ function App() {
   const [focusedMemoryId, setFocusedMemoryId] = useState<string | null>(initialUrlState.memoryId)
   const [memoryAuthorFilter, setMemoryAuthorFilter] = useState(initialUrlState.author)
   const [memoryTimeFilter, setMemoryTimeFilter] = useState(initialUrlState.time)
+  const [contributionOpen, setContributionOpen] = useState(false)
 
   const activePlace = useMemo(
     () => places.find((place) => place.id === activePlaceId) ?? null,
@@ -555,6 +621,8 @@ function App() {
         />
       )}
 
+      {contributionOpen && <ContributionPanel onClose={() => setContributionOpen(false)} />}
+
       <a
         className="github-repo-link"
         href={repositoryUrl}
@@ -566,9 +634,9 @@ function App() {
           <path fill="currentColor" d="M12 .7a11.3 11.3 0 0 0-3.57 22.02c.57.1.78-.25.78-.55v-2.14c-3.17.69-3.84-1.34-3.84-1.34-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.74 2.68 1.24 3.33.95.1-.74.4-1.24.73-1.53-2.53-.29-5.2-1.27-5.2-5.65 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.45.11-3.02 0 0 .96-.31 3.13 1.17a10.86 10.86 0 0 1 5.7 0c2.17-1.48 3.13-1.17 3.13-1.17.62 1.57.23 2.73.11 3.02.73.8 1.18 1.82 1.18 3.07 0 4.39-2.68 5.35-5.22 5.64.41.36.78 1.07.78 2.16v3.2c0 .3.2.66.79.55A11.3 11.3 0 0 0 12 .7Z" />
         </svg>
       </a>
-      <a className="contribute-memory-link" href={contributionGuideUrl} target="_blank" rel="noreferrer">
+      <button className="contribute-memory-link" type="button" onClick={() => setContributionOpen(true)}>
         <span>＋</span> Contribute a Memory
-      </a>
+      </button>
     </main>
   )
 }
