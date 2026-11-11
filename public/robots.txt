@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://zhouyinlong-lab.github.io/Memory_Atlas/sitemap.xml

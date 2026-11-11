@@ -290,6 +290,7 @@ export function MapView({
   const homePitchRef = useRef(58)
   const routeCameraInitializedRef = useRef(false)
   const [mapReady, setMapReady] = useState(0)
+  const [mapStatus, setMapStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   const [offscreenGuides, setOffscreenGuides] = useState<OffscreenGuide[]>([])
   const [offscreenGuidesVisible, setOffscreenGuidesVisible] = useState(false)
 
@@ -333,6 +334,7 @@ export function MapView({
 
       map.on('load', () => {
         if (!map || disposed) return
+        setMapStatus('ready')
 
         if (mode === 'vector') configureCityScene(map)
 
@@ -428,7 +430,14 @@ export function MapView({
         setMapReady((current) => current + 1)
       })
 
+      map.on('error', (event) => {
+        if (!map || disposed || map.loaded()) return
+        if (event.error) setMapStatus('error')
+      })
+
       mapRef.current = map
+    }).catch(() => {
+      if (!disposed) setMapStatus('error')
     })
 
     return () => {
@@ -674,7 +683,13 @@ export function MapView({
 
   return (
     <div className="map-shell">
-      <div className="map-view" ref={mapContainerRef} aria-label="苏州路线地图" />
+      <div className="map-view" id="atlas-map" ref={mapContainerRef} aria-label="Memory Atlas 地点与路线地图" />
+      {mapStatus !== 'ready' && (
+        <div className={`map-status map-status--${mapStatus}`} role={mapStatus === 'error' ? 'alert' : 'status'} aria-live="polite">
+          <span>{mapStatus === 'error' ? 'MAP SIGNAL LOST' : 'LOADING ATLAS'}</span>
+          <p>{mapStatus === 'error' ? '地图暂时无法载入，请检查网络后刷新页面。' : '正在载入地点、路线和地图…'}</p>
+        </div>
+      )}
       <div className="map-overlay">
         <div
           className="map-offscreen-guides"

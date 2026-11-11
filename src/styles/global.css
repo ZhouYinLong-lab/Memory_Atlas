@@ -15,6 +15,12 @@ button { font: inherit; }
 .map-stage { position: absolute; inset: 0; overflow: hidden; }
 .map-shell { position: absolute; inset: 0; }
 .map-view { position: absolute; inset: 0; background: #171717; }
+.skip-link { position: fixed; z-index: 60; top: 8px; left: 50%; padding: 10px 14px; color: var(--ink); background: var(--yellow); border: 2px solid var(--ink); text-decoration: none; font: 11px var(--mono); transform: translate(-50%, -150%); transition: transform 120ms ease; }
+.skip-link:focus { transform: translate(-50%, 0); outline: 2px solid var(--paper); outline-offset: 2px; }
+.map-status { position: absolute; z-index: 3; top: 50%; left: 50%; min-width: 250px; padding: 20px 24px; color: var(--paper); text-align: center; background: rgba(17,17,17,0.92); border: 2px solid var(--paper); border-left: 7px solid var(--yellow); box-shadow: 8px 8px 0 var(--red); transform: translate(-50%, -50%); pointer-events: none; }
+.map-status span { color: var(--yellow); font: 15px var(--display); letter-spacing: 0.08em; }
+.map-status p { margin: 8px 0 0; color: var(--paper-soft); font: 11px/1.4 var(--body); }
+.map-status--error { border-left-color: var(--red); }
 .map-overlay { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
 .map-offscreen-guides { position: absolute; inset: 0; pointer-events: none; }
 .map-offscreen-guide { position: absolute; display: flex; align-items: center; gap: 7px; width: 150px; max-width: 150px; padding: 5px 8px 5px 5px; color: var(--paper); background: rgba(17,17,17,0.92); border: 1px solid var(--paper); box-shadow: 4px 4px 0 var(--red); cursor: pointer; pointer-events: auto; }

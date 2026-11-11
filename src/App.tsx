@@ -505,6 +505,7 @@ function App() {
 
   return (
     <main className={`app-shell ${activePlace ? 'has-detail' : ''}`}>
+      <a className="skip-link" href="#atlas-map">跳到地图</a>
       <div className="map-stage">
         <MapView
           places={places}

@@ -1,0 +1,18 @@
+{
+  "name": "Memory Atlas",
+  "short_name": "Memory Atlas",
+  "description": "A shared, place-based archive of routes, photographs, and reviewed memories.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#111111",
+  "theme_color": "#111111",
+  "icons": [
+    {
+      "src": "favicon-candidates-v4/01-bold-map-pin.png",
+      "sizes": "1254x1254",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

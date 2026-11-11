@@ -446,3 +446,12 @@ test('mobile layout has no horizontal overflow', async ({ page }) => {
   }))
   expect(dimensions.content).toBeLessThanOrEqual(dimensions.viewport)
 })
+
+test('ships discoverability metadata and accessible map navigation', async ({ page }) => {
+  await page.goto('/')
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://zhouyinlong-lab.github.io/Memory_Atlas/')
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', 'https://zhouyinlong-lab.github.io/Memory_Atlas/social-card.png')
+  await expect(page.locator('link[rel="manifest"]')).toHaveAttribute('href', '/site.webmanifest')
+  await expect(page.getByRole('link', { name: '跳到地图' })).toHaveAttribute('href', '#atlas-map')
+  await expect(page.locator('#atlas-map')).toHaveAttribute('aria-label', 'Memory Atlas 地点与路线地图')
+})
