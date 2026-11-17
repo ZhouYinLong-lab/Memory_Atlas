@@ -67,3 +67,12 @@ Verification on 2026-11-06: `npm run build` passed with 3 memories, 2 authors, a
 - [x] Preserve the static GitHub Pages architecture, legacy Place content, and manual maintainer review.
 
 V1 verification on 2026-11-11: production dependency audit reports zero vulnerabilities; build and optional server typecheck pass after validating 19 places, 3 memories, 2 authors, and 363 media derivatives. The full Playwright run finished with 57 passed and 3 intentional mobile duplicate-project skips. GitHub Pages run `42986409675` deployed successfully with the current Actions versions. Live checks confirmed 19 markers, a 200 response for the MapLibre 6 worker, the Jinji Lake deep link and ordered authors, the 960px Memory thumbnail, Agent intake panel, branded 404, and no failed public resources.
+
+## Iteration 2026-11-17
+
+- [x] Add a small Memory count badge to map location stickers without changing their accessible place labels.
+- [x] Add a top-of-drawer Memory index with ordered title, date, and author links.
+- [x] Make index links reuse stable Memory URLs and focus the matching card.
+- [x] Cover the new discovery paths on desktop and mobile Playwright projects.
+
+Iteration verification: `npm run build` passed; the new marker-count and Memory-index tests passed on desktop and mobile. The full suite reached 58 passed, 3 intentional skips; the existing attribution test passed twice in an isolated rerun after one concurrent-load timeout.

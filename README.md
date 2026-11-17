@@ -28,6 +28,7 @@ Memory Atlas 基于 [Dog-Map](https://github.com/ZhouYinLong-lab/Dog-Map) 渐进
 - 地点详情抽屉与多媒体内容
 - 点击图片查看大图，支持背景、关闭按钮和 `Esc` 退出
 - 响应式移动端布局
+- 地图地点贴纸显示已发布 Memory 数量；地点详情顶部提供 Memory index 快速入口
 - 静态照片与可选媒体 API 两种内容来源
 - 一个地点包含多条 Memory，一条 Memory 支持按展示顺序排列的多位平等作者
 - 按作者或发生时间筛选 Shared Memories，并支持新旧排序与 URL 状态恢复
