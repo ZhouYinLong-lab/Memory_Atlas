@@ -38,7 +38,7 @@ function readAtlasUrl(): AtlasUrlState {
   }
 }
 
-function atlasHref({ placeId, memoryId = null, author = 'all', time = 'all', order = 'newest' }: AtlasUrlState) {
+function atlasHref({ placeId, memoryId = null, author = 'all', time = 'all', order = 'newest' }: Pick<AtlasUrlState, 'placeId'> & Partial<Omit<AtlasUrlState, 'placeId'>>) {
   const url = new URL(window.location.href)
   url.search = ''
   url.hash = ''
@@ -324,6 +324,50 @@ function MemoryCard({
   )
 }
 
+function MemoryIndex({
+  memories: placeMemories,
+  authorsById,
+  onOpen,
+}: {
+  memories: Memory[]
+  authorsById: Map<string, Author>
+  onOpen: (memory: Memory) => void
+}) {
+  const orderedMemories = [...placeMemories].sort((left, right) => Date.parse(right.occurredAt) - Date.parse(left.occurredAt))
+
+  return (
+    <nav className="memory-index" aria-label="Memory index">
+      <div className="memory-index__heading">
+        <span className="detail-section__index">MEMORY / INDEX</span>
+        <strong>{placeMemories.length.toString().padStart(2, '0')} STORIES</strong>
+      </div>
+      <div className="memory-index__list">
+        {orderedMemories.map((memory) => (
+          <a
+            className="memory-index__item"
+            key={memory.id}
+            href={atlasHref({ placeId: memory.placeId, memoryId: memory.id })}
+            onClick={(event) => {
+              event.preventDefault()
+              onOpen(memory)
+            }}
+          >
+            <span className="memory-index__time">{formatOccurredAt(memory.occurredAt)}</span>
+            <strong>{memory.title}</strong>
+            <span className="memory-index__authors">
+              {memory.authors
+                .map((authorId) => authorsById.get(authorId)?.displayName)
+                .filter(Boolean)
+                .join(' · ')}
+              <span aria-hidden="true"> ↗</span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </nav>
+  )
+}
+
 function App() {
   const [initialUrlState] = useState(readAtlasUrl)
   const [activePlaceId, setActivePlaceId] = useState<string | null>(initialUrlState.placeId)
@@ -352,6 +396,10 @@ function App() {
   const activePlaceMemories = useMemo(
     () => memories.filter((memory) => memory.placeId === activePlace?.id),
     [activePlace?.id],
+  )
+  const memoryCounts = useMemo(
+    () => Object.fromEntries(places.map((place) => [place.id, memories.filter((memory) => memory.placeId === place.id).length])),
+    [],
   )
   const memoryAuthors = useMemo(() => {
     const ids = new Set(activePlaceMemories.flatMap((memory) => memory.authors))
@@ -513,6 +561,7 @@ function App() {
           activePlaceId={activePlaceId}
           hoveredPlaceId={hoveredPlaceId}
           activeRouteId={activeRouteId}
+          memoryCounts={memoryCounts}
           onHoverPlace={handleHoverPlace}
           onSelectPlace={handleSelectPlace}
           onClearPlace={handleClearPlace}
@@ -563,6 +612,9 @@ function App() {
           ) : (
             <>
               <p className="detail-drawer__description">{activePlace.description}</p>
+              {activePlaceMemories.length > 0 && (
+                <MemoryIndex memories={activePlaceMemories} authorsById={authorsById} onOpen={handleFollowMemoryLink} />
+              )}
               {hasShops && activePlace.shops && (
                 <section className="detail-section detail-section--shops" aria-label="探店列表">
                   <div className="detail-section__heading">

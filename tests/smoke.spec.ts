@@ -13,6 +13,9 @@ test('renders the current destination markers without demo content', async ({ pa
   await expect(page.locator('.place-marker__art')).toHaveCount(places.length)
   await expect(page.getByRole('button', { name: '打开地点：南京大学苏州校区' })).toHaveClass(/place-marker--sticker/)
   await expect(page.getByRole('button', { name: '打开地点：东渚夜市与街道' })).toHaveClass(/place-marker--sticker/)
+  await expect(page.getByRole('button', { name: '打开地点：南京大学苏州校区' })).toHaveAttribute('data-memory-count', '2')
+  await expect(page.getByRole('button', { name: '打开地点：金鸡湖' })).toHaveAttribute('data-memory-count', '1')
+  await expect(page.getByRole('button', { name: '打开地点：东渚夜市与街道' })).toHaveAttribute('data-memory-count', '0')
   await expect(page.getByRole('button', { name: '打开地点：拙政园' })).toHaveClass(/place-marker--sticker/)
   await expect(page.getByRole('button', { name: '打开地点：狮子林' })).toHaveClass(/place-marker--sticker/)
   await expect(page.getByRole('button', { name: '打开地点：留园' })).toHaveClass(/place-marker--sticker/)
@@ -320,6 +323,21 @@ test('restores stable place and memory links across reload and history', async (
   await page.goBack()
   await expect(page.getByRole('complementary', { name: '金鸡湖详情' })).toBeVisible()
   await expect(memory).toHaveClass(/is-focused/)
+})
+
+test('offers a Memory index at the top of a place detail', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('button', { name: '打开地点：南京大学苏州校区' }).click()
+
+  const index = page.getByRole('navigation', { name: 'Memory index' })
+  await expect(index).toBeVisible()
+  await expect(index.locator('.memory-index__item')).toHaveCount(2)
+  await expect(index).toContainText('骑车初遇：抵达校区')
+  await expect(index).toContainText('周玄渊')
+
+  await index.getByRole('link', { name: /骑车初遇：抵达校区/ }).click()
+  await expect(page).toHaveURL(/memory=nju-suzhou-first-ride-20260824/)
+  await expect(page.locator('[data-memory-id="nju-suzhou-first-ride-20260824"]')).toHaveClass(/is-focused/)
 })
 
 test('uses memory titles and footer links as stable permalinks', async ({ page }) => {

@@ -15,6 +15,7 @@ type MapViewProps = {
   activePlaceId: string | null
   hoveredPlaceId: string | null
   activeRouteId: string | null
+  memoryCounts: Record<string, number>
   onHoverPlace: (placeId: string | null) => void
   onSelectPlace: (placeId: string) => void
   onSelectRoute: (routeId: string) => void
@@ -277,6 +278,7 @@ export function MapView({
   activePlaceId,
   hoveredPlaceId,
   activeRouteId,
+  memoryCounts,
   onHoverPlace,
   onSelectPlace,
   onSelectRoute,
@@ -524,10 +526,12 @@ export function MapView({
       element.style.visibility = 'visible'
       element.style.setProperty('--route-color', (place.routeId ? routeColors[place.routeId] : undefined) ?? getRouteColor(0))
       element.setAttribute('aria-label', `打开地点：${place.title}`)
+      const memoryCount = memoryCounts[place.id] ?? 0
+      element.dataset.memoryCount = String(memoryCount)
       const markerImage = place.markerImage
         ? place.markerImage.replace(/\.webp$/i, '.marker.webp')
         : artworkDataUri(place.id, place.accent, place.art)
-      element.innerHTML = `<span class="place-marker__visual"><img class="place-marker__art" src="${markerImage}" alt="" aria-hidden="true" loading="lazy" decoding="async" /></span>`
+      element.innerHTML = `<span class="place-marker__visual"><img class="place-marker__art" src="${markerImage}" alt="" aria-hidden="true" loading="lazy" decoding="async" /></span>${memoryCount > 0 ? `<span class="place-marker__memory-count" aria-hidden="true">${String(memoryCount).padStart(2, '0')} MEM</span>` : ''}`
       const art = element.querySelector<HTMLImageElement>('.place-marker__art')
       if (art && place.markerImage) {
         art.addEventListener('error', () => {
@@ -582,7 +586,7 @@ export function MapView({
       markersRef.current = []
       markerElementsRef.current = []
     }
-  }, [mapReady, places, routes, onHoverPlace, onSelectPlace])
+  }, [mapReady, memoryCounts, places, routes, onHoverPlace, onSelectPlace])
 
   useEffect(() => {
     const map = mapRef.current
